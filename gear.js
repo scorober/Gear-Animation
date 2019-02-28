@@ -122,9 +122,9 @@ function main() {
 function initBuffers(gl,programInfo) {
 
   gearData = createGear();
-  vertices = gearData[0];
-  colors = gearData[1]; 
-  normals = gearData[2]; 
+  const vertices = gearData[0];
+  const colors = gearData[1]; 
+  const normals = gearData[2]; 
 
   // Create  buffers for the object's vertex positions
   const vertexBuffer = gl.createBuffer();
