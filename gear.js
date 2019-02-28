@@ -314,41 +314,40 @@ function loadShader(gl, type, source) {
 
 
 
-/*
-//  build the object, including geometry (triangle vertices)
-//  and possibly colors and normals for each vertex
-function createGear() {
-    const vertices = [];
-    const colors = [];
-    var i;
-    var x = -0.5, y = 0, z = 0;
-    var r = 0.1, g = 0.5, b = 0.9;
+
+// //  build the object, including geometry (triangle vertices)
+// //  and possibly colors and normals for each vertex
+// function createGear() {
+//     const vertices = [];
+//     const colors = [];
+//     var i;
+//     var x = -0.5, y = 0, z = 0;
+//     var r = 0.1, g = 0.5, b = 0.9;
 
      
-    for (i = 0; i < 10; i++) {
+//     for (i = 0; i < 10; i++) {
 
-         vertices.push(x,y,z)
-         vertices.push(x+0.2,y,z)
-         vertices.push(x+0.1,y+0.3,z)     
+//          vertices.push(x,y,z)
+//          vertices.push(x+0.2,y,z)
+//          vertices.push(x+0.1,y+0.3,z)     
 
-         colors.push(r,g,b);
-         colors.push(r,g,b); 
-         colors.push(r,g,b);
+//          colors.push(r,g,b);
+//          colors.push(r,g,b); 
+//          colors.push(r,g,b);
          
-         r += 0.2
-         g += 0.2
-         b += 0.2
-         if (r > 1)
-             r -= 1
-         if (g > 1)
-             g -= 1
-         if (b > 1)
-             b -= 1                          
+//          r += 0.2
+//          g += 0.2
+//          b += 0.2
+//          if (r > 1)
+//              r -= 1
+//          if (g > 1)
+//              g -= 1
+//          if (b > 1)
+//              b -= 1                          
                                     
                      
-         x += 0.1   
-         z += -0.05
-    }
-    return [vertices,colors]
-}
-*/
+//          x += 0.1   
+//          z += -0.05
+//     }
+//     return [vertices,colors]
+// }
