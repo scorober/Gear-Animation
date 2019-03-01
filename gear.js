@@ -244,13 +244,19 @@ function drawScene(gl, programInfo, buffers, angle_x, angle_y) {
   var rotate_y_matrix = matrix.create();
   var transform = matrix.create(); 
   var scale = matrix.create();
+  var lookat = matrix.create()
+  
   matrix.scale(scale,0.8,0.8,0.8);
 
   matrix.rotate(rotate_x_matrix, angle_x, 1, 0, 0);
   matrix.rotate(rotate_y_matrix, angle_y, 0, 1, 0);
+
+  matrix.lookAt(lookat, 0, 0, 5, 0, 0, 0, 0, 1, 0);
+  var proj = matrix.createOrthographic(-1, 1, -1, 1, 3, 7)
+  
     
   // Combine the two rotations into a single transformation
-  matrix.multiplySeries(transform, 
+  matrix.multiplySeries(transform, proj, lookat,
         rotate_x_matrix, rotate_y_matrix,scale);
 
   // Set the shader program's uniform
@@ -311,43 +317,3 @@ function loadShader(gl, type, source) {
 
   return shader;
 }
-
-
-
-
-// //  build the object, including geometry (triangle vertices)
-// //  and possibly colors and normals for each vertex
-// function createGear() {
-//     const vertices = [];
-//     const colors = [];
-//     var i;
-//     var x = -0.5, y = 0, z = 0;
-//     var r = 0.1, g = 0.5, b = 0.9;
-
-     
-//     for (i = 0; i < 10; i++) {
-
-//          vertices.push(x,y,z)
-//          vertices.push(x+0.2,y,z)
-//          vertices.push(x+0.1,y+0.3,z)     
-
-//          colors.push(r,g,b);
-//          colors.push(r,g,b); 
-//          colors.push(r,g,b);
-         
-//          r += 0.2
-//          g += 0.2
-//          b += 0.2
-//          if (r > 1)
-//              r -= 1
-//          if (g > 1)
-//              g -= 1
-//          if (b > 1)
-//              b -= 1                          
-                                    
-                     
-//          x += 0.1   
-//          z += -0.05
-//     }
-//     return [vertices,colors]
-// }
