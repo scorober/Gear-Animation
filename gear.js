@@ -29,6 +29,8 @@ function main() {
   
     uniform mat4 u_transform; 
     uniform vec3 u_light_dir;
+
+  
   
     varying vec4 v_color;
 
@@ -120,7 +122,6 @@ function main() {
 // have one object -- a simple two-dimensional square.
 //
 function initBuffers(gl,programInfo) {
-
   gearData = createGear();
   const vertices = gearData[0];
   const colors = gearData[1]; 
