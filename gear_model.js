@@ -42,10 +42,7 @@ function createGear() {
         if (drawTooth) {
             var rotateMat = mat.create()
             mat.rotate(rotateMat, mat.toDegrees(ang + angInc), 0, 0, 1)
-            // drawToothFace()
-            // drawToothRoof()
-            // drawToothSlants()
-            darwToothWalls()
+            drawGearTooth()
             createSpoke(rotateMat)
         } else {
             drawCoinEdge()
@@ -242,52 +239,6 @@ function createInnerRing() {
 
 }
 
-function drawToothFace() {
-    //Insert two triangles representing square of tooth face.
-    var rot0 = mat.create()
-    mat.rotate(rot0, 180, 0, 1, 0)
-
-    var v1 = vec4.create(rad * Math.cos(ang), rad * Math.sin(ang), -z)
-    var v2 = vec4.create(rad * Math.cos(ang + angInc), rad * Math.sin(ang + angInc), -z)
-    var v3 = vec4.create(outRad * Math.cos(ang + angInc), outRad * Math.sin(ang + angInc), -z)
-
-    var v4 = vec4.create(rad * Math.cos(ang), rad * Math.sin(ang), -z)
-    var v5 = vec4.create(outRad * Math.cos(ang + angInc), outRad * Math.sin(ang + angInc), -z)
-    var v6 = vec4.create(outRad * Math.cos(ang), outRad * Math.sin(ang), -z)
-
-    var norm0 = calcNormalFromVec(v1, v2, v3)
-    var norm1 = calcNormalFromVec(v4, v5, v6)
-
-    pushTriangle(createTriangle(v1, v2, v3), norm0, pink)
-    pushTriangle(createTriangle(v4, v5, v6), norm1, pink)
-
-    
-    var newV1 = vec4.create();
-    mat.multiplyP4(newV1, rot0, v1);
-    var newV2 = vec4.create();
-    mat.multiplyP4(newV2, rot0, v2);
-    var newV3 = vec4.create();
-    mat.multiplyP4(newV3, rot0, v3)
-    var newNorm0 = vec4.create()
-    mat.multiplyP4(newNorm0, rot0, norm0)
-
-    var norm1 = calcNormalFromVec(v4, v5, v6)
-    var newV4 = vec4.create();
-    mat.multiplyP4(newV4, rot0, v4);
-    var newV5 = vec4.create();
-    mat.multiplyP4(newV5, rot0, v5);
-    var newV6 = vec4.create();
-    mat.multiplyP4(newV6, rot0, v6)
-
-    var newNorm1 = vec4.create()
-    mat.multiplyP4(newNorm1, rot0, norm1)
-
-    pushTriangle(createTriangle(newV1, newV2, newV3), newNorm0, pink)
-    pushTriangle(createTriangle(newV4, newV5, newV6), newNorm1, pink)
-
-
-}
-
 function drawCoinEdge() {
     var v1 = vec4.create(rad * Math.cos(ang), rad * Math.sin(ang), -z)
     var v2 = vec4.create(rad * Math.cos(ang + angInc), rad * Math.sin(ang + angInc), -z)
@@ -321,92 +272,6 @@ function drawToothRoof() {
 
 }
 
-function drawToothSlants() {
-    var width = Math.cos(ang + angInc) - Math.cos(ang)
-    var depth = 0.2
-    var aDiv = 4
-
-    
-    var rot0 = mat.create()
-    mat.rotate(rot0, 180, 0, 1, 0)
-    //CREATE THE INTERIOR SLANTS
-    var v1 = vec4.create(outRad * Math.cos(ang), outRad * Math.sin(ang), -z, )
-    var v2 = vec4.create(outRad * Math.cos(ang + angInc / aDiv), tRad * Math.sin(ang + angInc / aDiv), -z + tStepIn)
-    var v3 = vec4.create(outRad * Math.cos(ang + angInc / aDiv), tRad * Math.sin(ang + angInc / aDiv), z - tStepIn)
-
-    var v4 = vec4.create(outRad * Math.cos(ang), outRad * Math.sin(ang), z)
-    var v5 = vec4.create(outRad * Math.cos(ang), outRad * Math.sin(ang), -z)
-    var v6 = vec4.create(outRad * Math.cos(ang + angInc / aDiv), tRad * Math.sin(ang + angInc / aDiv), z - tStepIn)
-
-
-    var norm0 = calcNormalFromVec(v1, v2, v3)
-
-    var newV1 = vec4.create();
-    mat.multiplyP4(newV1, rot0, v1);
-    var newV2 = vec4.create();
-    mat.multiplyP4(newV2, rot0, v2);
-    var newV3 = vec4.create();
-    mat.multiplyP4(newV3, rot0, v3)
-    var newNorm0 = vec4.create()
-    mat.multiplyP4(newNorm0, rot0, norm0)
-
-    pushTriangle(createTriangle(v1, v2, v3), norm0, testColors)
-    pushTriangle(createTriangle(newV1, newV2, newV3), newNorm0, testColors)
-
-
-    var norm1 = calcNormalFromVec(v4, v5, v6)
-    var newV4 = vec4.create();
-    mat.multiplyP4(newV4, rot0, v4);
-    var newV5 = vec4.create();
-    mat.multiplyP4(newV5, rot0, v5);
-    var newV6 = vec4.create();
-    mat.multiplyP4(newV6, rot0, v6)
-
-    var newNorm1 = vec4.create()
-    mat.multiplyP4(newNorm1, rot0, norm1)
-
-    pushTriangle(createTriangle(v4, v5, v6), norm1, testColors)
-    pushTriangle(createTriangle(newV4, newV5, newV6), newNorm1, testColors)
-
-    //CREATE THE EXTERIOR SLANTS
-    var u1 = vec4.create(outRad * Math.cos(ang), outRad * Math.sin(ang), -z)
-    var u2 = vec4.create(outRad * Math.cos(ang + angInc), outRad * Math.sin(ang + angInc), -z)
-    var u3 = vec4.create(outRad * Math.cos(ang + angInc / aDiv), tRad * Math.sin(ang + angInc / aDiv), -z + tStepIn)
-
-    var u4 = vec4.create(outRad * Math.cos(ang + angInc - (angInc/ aDiv)), tRad * Math.sin(ang + angInc - (angInc/ aDiv)), -z + tStepIn) 
-    var u5 = vec4.create(outRad * Math.cos(ang + angInc / aDiv), tRad * Math.sin(ang + angInc / aDiv), -z + tStepIn)
-    var u6 = vec4.create(outRad * Math.cos(ang + angInc), outRad * Math.sin(ang + angInc), -z) //bottom left
-    
-    var norm2 = calcNormalFromVec(u1, u2, u3)
-   
-    var newU1 = vec4.create();
-    mat.multiplyP4(newU1, rot0, u1);
-    var newU2 = vec4.create();
-    mat.multiplyP4(newU2, rot0, u2);
-    var newU3 = vec4.create();
-    mat.multiplyP4(newU3, rot0, u3)
-    var newNorm2 = vec4.create()
-    mat.multiplyP4(newNorm2, rot0, norm2)
-
-    pushTriangle(createTriangle(u1, u2, u3), norm2, testColors)
-    pushTriangle(createTriangle(newU1, newU2, newU3), newNorm2, testColors)
-
-
-    var norm3 = calcNormalFromVec(u4, u5, u6)
-    var newU4 = vec4.create();
-    mat.multiplyP4(newU4, rot0, u4);
-    var newU5 = vec4.create();
-    mat.multiplyP4(newU5, rot0, u5);
-    var newU6 = vec4.create();
-    mat.multiplyP4(newU6, rot0, u6)
-    var newNorm3 = vec4.create()
-    mat.multiplyP4(newNorm3, rot0, norm3)
-
-    pushTriangle(createTriangle(u4, u5, u6), norm3, testColors)
-    pushTriangle(createTriangle(newU4, newU5, newU6), newNorm3, testColors)
-
-
-}
 
 function createSpoke(rotateMat) {
     var steps = 180
@@ -456,7 +321,7 @@ function createSpoke(rotateMat) {
     }
 }
 
-function darwToothWalls() {
+function drawGearTooth() {
 
     var inStep = 0.03
     var angStep = angInc / 4
@@ -476,8 +341,6 @@ function darwToothWalls() {
 
     pushTriangle(createTriangle(v1, v2, v3), norm0, testColors)
     pushTriangle(createTriangle(v4, v5, v6), norm1, testColors)
-
-
 
     var newV1 = vec4.create();
     mat.multiplyP4(newV1, rot0, v1);
@@ -545,7 +408,18 @@ function darwToothWalls() {
     pushTriangle(createTriangle(newV1, newV2, newV3), newNorm0, testColors)
     pushTriangle(createTriangle(newV4, newV5, newV6), newNorm1, testColors)
 
+    var r1 = vec4.create(outRad * Math.cos(ang + angStep), outRad * Math.sin(ang + angStep), -z + inStep)
+    var r2 = vec4.create(outRad * Math.cos(ang + angStep), outRad * Math.sin(ang + angStep), z - inStep)
+    var r3 = vec4.create(outRad * Math.cos(ang + 3 * angStep), outRad * Math.sin(ang + 3 * angStep), -z + inStep)
 
-  
+    var normR = calcNormalFromVec(r1, r2, r3)
+    pushTriangle(createTriangle(r1, r2, r3), normR, testColors)
+        
+    var r4 = vec4.create(outRad * Math.cos(ang + angStep), outRad * Math.sin(ang + angStep), z - inStep)
+    var r5 = vec4.create(outRad * Math.cos(ang + angStep * 3), outRad * Math.sin(ang + angStep * 3), z - inStep)
+    var r6 = vec4.create(outRad * Math.cos(ang + 3 * angStep), outRad * Math.sin(ang + 3 * angStep), -z + inStep)
+
+    normR = calcNormalFromVec(r4, r5, r6)
+    pushTriangle(createTriangle(r4, r5, r6), normR, testColors)
 
 }
