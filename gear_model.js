@@ -15,7 +15,7 @@ const testColors = [0.019608, 1, 0.631373, 0.019608, 1, 0.631373, 0.019608, 1, 0
 const negNormal = [0, 0, -1]
 const posNormal = [0, 0, 1]
 
-const n = 20;
+const n = 14;
 const rad = 1.0;
 const outRad = rad * 1.1;
 const angInc = 2 * 3.14159 / n;
@@ -27,7 +27,7 @@ const tStepIn = 0.05
 const cStart = 0.32
 const cEnd = 0.42
 const ringStart = 0.9
-const SPOKES = 20
+const SPOKES = 8
 
 // const aDiv = 4
 
@@ -189,6 +189,7 @@ function createInnerRing() {
 
     var rotateMat = mat.create();
     var rotateRingInner = mat.create();
+
     //Matrix to rotate front to back.
     mat.rotate(rotateMat, 180, 0, 1, 0);
     mat.rotate(rotateRingInner, 180, 0, 0, 1)
@@ -293,11 +294,11 @@ function createSpoke(rotateMat) {
     var midY = ringStart - cEnd - 0.1
 
     for (var j = 0; j < steps; j++) {
-        var v1 = vec4.create(.05 * Math.cos(angle), cEnd - .1, .05 * Math.sin(angle))
-        var v2 = vec4.create(.05 * Math.cos(angle + aStep), cEnd -.1, .05 *   Math.sin(angle + aStep))
+        var v1 = vec4.create(.05 * Math.cos(angle), cEnd - .01, .05 * Math.sin(angle))
+        var v2 = vec4.create(.05 * Math.cos(angle + aStep), cEnd -.01, .05 *   Math.sin(angle + aStep))
         var v3 = vec4.create(.05 * Math.cos(angle + aStep), ringStart, .05 *  Math.sin(angle + aStep))
 
-        var v4 = vec4.create(.05 * Math.cos(angle), cEnd - .1, .05 * Math.sin(angle))
+        var v4 = vec4.create(.05 * Math.cos(angle), cEnd - .01, .05 * Math.sin(angle))
         var v5 = vec4.create(.05 * Math.cos(angle + aStep), ringStart, .05 *   Math.sin(angle + aStep))
         var v6 = vec4.create(.05 * Math.cos(angle), ringStart, .05 *  Math.sin(angle))
 
