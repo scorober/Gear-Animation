@@ -15,7 +15,7 @@ const testColors = [0.019608, 1, 0.631373, 0.019608, 1, 0.631373, 0.019608, 1, 0
 const negNormal = [0, 0, -1]
 const posNormal = [0, 0, 1]
 
-const n = 54;
+const n = 20;
 const rad = 1.0;
 const outRad = rad * 1.1;
 const angInc = 2 * 3.14159 / n;
@@ -27,6 +27,7 @@ const tStepIn = 0.05
 const cStart = 0.32
 const cEnd = 0.42
 const ringStart = 0.9
+const SPOKES = 20
 
 // const aDiv = 4
 
@@ -43,12 +44,23 @@ function createGear() {
             var rotateMat = mat.create()
             mat.rotate(rotateMat, mat.toDegrees(ang + angInc), 0, 0, 1)
             drawGearTooth()
-            createSpoke(rotateMat)
+            // createSpoke(rotateMat)
         } else {
             drawCoinEdge()
         }
         ang += angInc;
     }
+
+    //SEEMS TO FUCK UP THE OTHER LOOP?
+    ang = 0
+    var aStep = 2 * Math.PI / SPOKES
+    for (let j = 0; j < SPOKES; j++) {
+        var rotateMat = mat.create()
+        mat.rotate(rotateMat, mat.toDegrees(ang + angInc), 0, 0, 1)
+        createSpoke(rotateMat)
+        ang += aStep
+    }
+
     return [vertices, colors, normals]
 }
 
