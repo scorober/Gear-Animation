@@ -114,27 +114,27 @@ function createOuterRing(options) {
     mat.rotate(rotateMat, 180, 0, 1, 0);
     mat.rotate(rotateRingInner, 180, 0, 0, 1)
 
-    var v1 = vec4.create(ringStart * rad * Math.cos(ang), ringStart * rad * Math.sin(ang), z);
-    var v2 = vec4.create(rad * Math.cos(ang), rad * Math.sin(ang), z);
-    var v3 = vec4.create(rad * Math.cos(ang + angInc), rad * Math.sin(ang + angInc), z);
+    const v1 = vec4.create(ringStart * rad * Math.cos(ang), ringStart * rad * Math.sin(ang), z);
+    const v2 = vec4.create(rad * Math.cos(ang), rad * Math.sin(ang), z);
+    const v3 = vec4.create(rad * Math.cos(ang + angInc), rad * Math.sin(ang + angInc), z);
 
-    var v4 = vec4.create(ringStart * rad * Math.cos(ang - angInc), ringStart * rad * Math.sin(ang - angInc), z);
-    var v5 = vec4.create(ringStart * rad * Math.cos(ang), ringStart * rad * Math.sin(ang), z);
-    var v6 = vec4.create(rad * Math.cos(ang), rad * Math.sin(ang), z);
+    const v4 = vec4.create(ringStart * rad * Math.cos(ang - angInc), ringStart * rad * Math.sin(ang - angInc), z);
+    const v5 = vec4.create(ringStart * rad * Math.cos(ang), ringStart * rad * Math.sin(ang), z);
+    const v6 = vec4.create(rad * Math.cos(ang), rad * Math.sin(ang), z);
 
-    var v7 = vec4.create(ringStart * rad * Math.cos(ang), ringStart * rad * Math.sin(ang), z);
-    var v8 = vec4.create(ringStart * rad * Math.cos(ang), ringStart * rad * Math.sin(ang), -z);
-    var v9 = vec4.create(ringStart * rad * Math.cos(ang + angInc), ringStart * rad * Math.sin(ang + angInc), z)
+    const v7 = vec4.create(ringStart * rad * Math.cos(ang), ringStart * rad * Math.sin(ang), z);
+    const v8 = vec4.create(ringStart * rad * Math.cos(ang), ringStart * rad * Math.sin(ang), -z);
+    const v9 = vec4.create(ringStart * rad * Math.cos(ang + angInc), ringStart * rad * Math.sin(ang + angInc), z)
 
-    var i1 = vec4.create(ringStart * rad * Math.cos(ang), ringStart * rad * Math.sin(ang), -z);
-    var i2 = vec4.create(ringStart * rad * Math.cos(ang + angInc), ringStart * rad * Math.sin(ang + angInc), z);
-    var i3 = vec4.create(ringStart * rad * Math.cos(ang + angInc), ringStart * rad * Math.sin(ang + angInc), -z);
+    const i1 = vec4.create(ringStart * rad * Math.cos(ang), ringStart * rad * Math.sin(ang), -z);
+    const i2 = vec4.create(ringStart * rad * Math.cos(ang + angInc), ringStart * rad * Math.sin(ang + angInc), z);
+    const i3 = vec4.create(ringStart * rad * Math.cos(ang + angInc), ringStart * rad * Math.sin(ang + angInc), -z);
 
 
-    var norm0 = calcNormalFromVec(v1, v2, v3)
-    var norm1 = calcNormalFromVec(v6, v5, v4)
+    const norm0 = calcNormalFromVec(v1, v2, v3)
+    const norm1 = calcNormalFromVec(v6, v5, v4)
 
-    var iNorm = [ringStart * rad * Math.cos(ang), ringStart * rad * Math.sin(ang), 0]
+    const iNorm = [ringStart * rad * Math.cos(ang), ringStart * rad * Math.sin(ang), 0]
 
     pushTriangle(createTriangle(v1, v2, v3), norm0, PINK)
     pushTriangle(createTriangle(v4, v5, v6), norm1, PINK)

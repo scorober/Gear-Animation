@@ -243,7 +243,7 @@ function initBuffers(gl, programInfo) {
     spokeRad: 0.05,
     outerThickness: 0.05,
     innerThickness: 0.05,
-    teethHeight: .2,
+    teethHeight: .1,
     outerColor: PINK,
     InnerColor: BLUE
   }
