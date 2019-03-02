@@ -236,11 +236,16 @@ function main() {
 //
 function initBuffers(gl, programInfo) {
   const options = {
-    // toothCount: 14,
-    // spokeCount: 8,
+    toothCount: 54,
+    spokeCount: 8,
     r1: 0.40,
     r2: 0.42,
-    // spokeRad: 0.05
+    spokeRad: 0.05,
+    outerThickness: 0.05,
+    innerThickness: 0.05,
+    teethHeight: .2,
+    outerColor: PINK,
+    InnerColor: BLUE
   }
 
   gearData = createGear(options);

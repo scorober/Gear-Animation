@@ -159,10 +159,10 @@ function createOuterRing(ang, options) {
 
     var iNorm = [ringStart * rad * Math.cos(ang), ringStart * rad * Math.sin(ang), 0]
 
-    pushTriangle(createTriangle(v1, v2, v3), norm0, pink)
-    pushTriangle(createTriangle(v4, v5, v6), norm1, pink)
-    pushTriangle(createTriangle(v7, v8, v9), iNorm, pink)
-    pushTriangle(createTriangle(i1, i2, i3), iNorm, pink)
+    pushTriangle(createTriangle(v1, v2, v3), norm0, PINK)
+    pushTriangle(createTriangle(v4, v5, v6), norm1, PINK)
+    pushTriangle(createTriangle(v7, v8, v9), iNorm, PINK)
+    pushTriangle(createTriangle(i1, i2, i3), iNorm, PINK)
 
     //Rotate and create reverse side.
     var newV1 = vec4.create();
@@ -179,8 +179,8 @@ function createOuterRing(ang, options) {
     var newV6 = vec4.create()
     mat.multiplyP4(newV6, rotateMat, v6)
 
-    pushTriangle(createTriangle(newV1, newV2, newV3), negNormal, pink)
-    pushTriangle(createTriangle(newV4, newV5, newV6), negNormal, pink)
+    pushTriangle(createTriangle(newV1, newV2, newV3), negNormal, PINK)
+    pushTriangle(createTriangle(newV4, newV5, newV6), negNormal, PINK)
 
 }
 
@@ -211,8 +211,8 @@ function createInnerRing(ang, options) {
     var c6 = vec4.create(cEnd * rad * Math.cos(ang), cEnd * rad * Math.sin(ang), z);
 
 
-    pushTriangle(createTriangle(c1, c2, c3), posNormal, blue)
-    pushTriangle(createTriangle(c4, c5, c6), posNormal, blue)
+    pushTriangle(createTriangle(c1, c2, c3), posNormal, BLUE)
+    pushTriangle(createTriangle(c4, c5, c6), posNormal, BLUE)
 
     //Rotate and create reverse side.
     var newC1 = vec4.create();
@@ -229,8 +229,8 @@ function createInnerRing(ang, options) {
     var newC6 = vec4.create()
     mat.multiplyP4(newC6, rotateMat, c6)
 
-    pushTriangle(createTriangle(newC1, newC2, newC3), negNormal, blue)
-    pushTriangle(createTriangle(newC4, newC5, newC6), negNormal, blue)
+    pushTriangle(createTriangle(newC1, newC2, newC3), negNormal, BLUE)
+    pushTriangle(createTriangle(newC4, newC5, newC6), negNormal, BLUE)
 
     var j1 = vec4.create(cStart * rad * Math.cos(ang), cStart * rad * Math.sin(ang), z);
     var j2 = vec4.create(cStart * rad * Math.cos(ang), cStart * rad * Math.sin(ang), -z);
@@ -242,8 +242,8 @@ function createInnerRing(ang, options) {
 
     var jNorm = [cStart * rad * Math.cos(ang), cStart * rad * Math.sin(ang), 0]
 
-    pushTriangle(createTriangle(j1, j2, j3), jNorm, blue)
-    pushTriangle(createTriangle(j4, j5, j6), jNorm, blue)
+    pushTriangle(createTriangle(j1, j2, j3), jNorm, BLUE)
+    pushTriangle(createTriangle(j4, j5, j6), jNorm, BLUE)
 
     var j7 = vec4.create(cEnd * rad * Math.cos(ang), cEnd * rad * Math.sin(ang), z);
     var j8 = vec4.create(cEnd * rad * Math.cos(ang), cEnd * rad * Math.sin(ang), -z);
@@ -255,8 +255,8 @@ function createInnerRing(ang, options) {
 
     jNorm = [cEnd * rad * Math.cos(ang), cEnd * rad * Math.sin(ang), 0]
 
-    pushTriangle(createTriangle(j7, j8, j9), jNorm, blue)
-    pushTriangle(createTriangle(j10, j11, j12), jNorm, blue)
+    pushTriangle(createTriangle(j7, j8, j9), jNorm, BLUE)
+    pushTriangle(createTriangle(j10, j11, j12), jNorm, BLUE)
 
 }
 
@@ -278,8 +278,8 @@ function drawCoinEdge(ang, options) {
     var norm0 = calcNormalFromVec(v1, v2, v3)
     var norm1 = calcNormalFromVec(v4, v5, v6)
 
-    pushTriangle(createTriangle(v1, v2, v3), norm0, pink)
-    pushTriangle(createTriangle(v4, v5, v6), norm1, pink)
+    pushTriangle(createTriangle(v1, v2, v3), norm0, PINK)
+    pushTriangle(createTriangle(v4, v5, v6), norm1, PINK)
 }
 
 

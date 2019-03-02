@@ -9,8 +9,8 @@ const vec3 = new Learn_webgl_vector3();
 
 
 const defaultColors = [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5]
-const blue = [0.004878, .803922, 0.996078, 0.004878, .803922, 0.996078, 0.004878, .803922, 0.996078]
-const pink = [1, .443137, 0.807843, 1, .443137, 0.807843, 1, .443137, 0.807843]
+const BLUE = [0.004878, .803922, 0.996078, 0.004878, .803922, 0.996078, 0.004878, .803922, 0.996078]
+const PINK = [1, .443137, 0.807843, 1, .443137, 0.807843, 1, .443137, 0.807843]
 const testColors = [0.019608, 1, 0.631373, 0.019608, 1, 0.631373, 0.019608, 1, 0.631373]
 const negNormal = [0, 0, -1]
 const posNormal = [0, 0, 1]
@@ -21,9 +21,8 @@ const rad = 1.0;
 const outRad = rad * 1.1;
 
 var ang = 0;
-// var z = 0.1;
+
 // var i; //  coin face, front & back
-const tRad = rad * 1.15
 const tStepIn = 0.05
 const cStart = 0.32
 const cEnd = 0.42
@@ -37,6 +36,7 @@ const TOOTH_COUNT = 54  //10 or higher but not divisible by 4?
 const SPOKE_RAD = .03
 const EXO_INNER = 0.05
 const EXO_OUTER = 0.1
+const TOOTH_HEIGHT = 0.1
 
 //NEW CONSTANTS:
 const CENTER_INNER = 0.32
@@ -60,9 +60,11 @@ function createGear(options) {
         r1: CENTER_INNER,
         r2: CENTER_OUTER,
         spokeRad: SPOKE_RAD,
-        //InnerColor, OuterColor, TeethHeight, innerThickness, outerThickness
         outerThickness: EXO_OUTER,
-        innerThickness: EXO_INNER
+        innerThickness: EXO_INNER,
+        teethHeight: TOOTH_HEIGHT,
+        outerColor: PINK,
+        InnerColor: BLUE
     }
 
 
@@ -134,10 +136,10 @@ function createOuterRing(options) {
 
     var iNorm = [ringStart * rad * Math.cos(ang), ringStart * rad * Math.sin(ang), 0]
 
-    pushTriangle(createTriangle(v1, v2, v3), norm0, pink)
-    pushTriangle(createTriangle(v4, v5, v6), norm1, pink)
-    pushTriangle(createTriangle(v7, v8, v9), iNorm, pink)
-    pushTriangle(createTriangle(i1, i2, i3), iNorm, pink)
+    pushTriangle(createTriangle(v1, v2, v3), norm0, PINK)
+    pushTriangle(createTriangle(v4, v5, v6), norm1, PINK)
+    pushTriangle(createTriangle(v7, v8, v9), iNorm, PINK)
+    pushTriangle(createTriangle(i1, i2, i3), iNorm, PINK)
 
     //Rotate and create reverse side.
     var newV1 = vec4.create();
@@ -154,8 +156,8 @@ function createOuterRing(options) {
     var newV6 = vec4.create()
     mat.multiplyP4(newV6, rotateMat, v6)
 
-    pushTriangle(createTriangle(newV1, newV2, newV3), negNormal, pink)
-    pushTriangle(createTriangle(newV4, newV5, newV6), negNormal, pink)
+    pushTriangle(createTriangle(newV1, newV2, newV3), negNormal, PINK)
+    pushTriangle(createTriangle(newV4, newV5, newV6), negNormal, PINK)
 
 }
 
@@ -180,8 +182,8 @@ function createInnerRing(options) {
     const c6 = vec4.create(cEnd * rad * Math.cos(ang), cEnd * rad * Math.sin(ang), z);
 
 
-    pushTriangle(createTriangle(c1, c2, c3), posNormal, blue)
-    pushTriangle(createTriangle(c4, c5, c6), posNormal, blue)
+    pushTriangle(createTriangle(c1, c2, c3), posNormal, BLUE)
+    pushTriangle(createTriangle(c4, c5, c6), posNormal, BLUE)
 
     //Rotate and create reverse side of face
     const newC1 = vec4.create();
@@ -198,8 +200,8 @@ function createInnerRing(options) {
     const newC6 = vec4.create()
     mat.multiplyP4(newC6, rotateMat, c6)
 
-    pushTriangle(createTriangle(newC1, newC2, newC3), negNormal, blue)
-    pushTriangle(createTriangle(newC4, newC5, newC6), negNormal, blue)
+    pushTriangle(createTriangle(newC1, newC2, newC3), negNormal, BLUE)
+    pushTriangle(createTriangle(newC4, newC5, newC6), negNormal, BLUE)
 
 
     //Inner edges of center ring.
@@ -216,8 +218,8 @@ function createInnerRing(options) {
     // pushTriangle(createTriangle(j4, j5, j6), calcNormalFromVec(j4, j5, j6), blue)
 
     const jNorm0 = [cStart * rad * Math.cos(ang), cStart * rad * Math.sin(ang), 0]
-    pushTriangle(createTriangle(j1, j2, j3), jNorm0, blue)
-    pushTriangle(createTriangle(j4, j5, j6), jNorm0, blue)
+    pushTriangle(createTriangle(j1, j2, j3), jNorm0, BLUE)
+    pushTriangle(createTriangle(j4, j5, j6), jNorm0, BLUE)
 
     //Outer edges of center ring.
     const j7 = vec4.create(cEnd * rad * Math.cos(ang), cEnd * rad * Math.sin(ang), z);
@@ -229,8 +231,8 @@ function createInnerRing(options) {
     const j12 = vec4.create(cEnd * rad * Math.cos(ang + angInc), cEnd * rad * Math.sin(ang + angInc), -z);
 
     const jNorm1 = [cEnd * rad * Math.cos(ang), cEnd * rad * Math.sin(ang), 0]
-    pushTriangle(createTriangle(j7, j8, j9), jNorm1, blue)
-    pushTriangle(createTriangle(j10, j11, j12), jNorm1, blue)
+    pushTriangle(createTriangle(j7, j8, j9), jNorm1, BLUE)
+    pushTriangle(createTriangle(j10, j11, j12), jNorm1, BLUE)
 
 }
 
@@ -247,8 +249,8 @@ function drawCoinEdge(options) {
     const norm0 = calcNormalFromVec(v1, v2, v3)
     const norm1 = calcNormalFromVec(v4, v5, v6)
 
-    pushTriangle(createTriangle(v1, v2, v3), norm0, pink)
-    pushTriangle(createTriangle(v4, v5, v6), norm1, pink)
+    pushTriangle(createTriangle(v1, v2, v3), norm0, PINK)
+    pushTriangle(createTriangle(v4, v5, v6), norm1, PINK)
 }
 
 function createSpoke(rotateMat, options) {
@@ -295,6 +297,7 @@ function createSpoke(rotateMat, options) {
 function drawGearTooth(angleStep, options) {
 
     const z = options.outerThickness;
+    const outRad = rad + options.teethHeight
     var inStep = 0.03
     var angStep = angleStep / 4
 
@@ -346,7 +349,7 @@ function drawGearTooth(angleStep, options) {
 
     //CHANGE V5 and V3...........
     v4 = vec4.create(rad * Math.cos(ang), rad * Math.sin(ang), -z)
-    v5 = v3 //vec4.create(outRad * Math.cos(ang + angInc), outRad * Math.sin(ang + angInc), -z + inStep)
+    v5 = v3;
     v6 = vec4.create(outRad * Math.cos(ang + angStep), outRad * Math.sin(ang + angStep), -z + inStep)
 
     norm0 = calcNormalFromVec(v1, v2, v3)

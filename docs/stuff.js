@@ -19,8 +19,8 @@ function createInnerRing(options) {
     var c6 = vec4.create(cEnd * rad * Math.cos(ang), cEnd * rad * Math.sin(ang), z);
 
 
-    pushTriangle(createTriangle(c1, c2, c3), posNormal, blue)
-    pushTriangle(createTriangle(c4, c5, c6), posNormal, blue)
+    pushTriangle(createTriangle(c1, c2, c3), posNormal, BLUE)
+    pushTriangle(createTriangle(c4, c5, c6), posNormal, BLUE)
 
     //Rotate and create reverse side.
     var newC1 = vec4.create();
@@ -37,8 +37,8 @@ function createInnerRing(options) {
     var newC6 = vec4.create()
     mat.multiplyP4(newC6, rotateMat, c6)
 
-    pushTriangle(createTriangle(newC1, newC2, newC3), negNormal, blue)
-    pushTriangle(createTriangle(newC4, newC5, newC6), negNormal, blue)
+    pushTriangle(createTriangle(newC1, newC2, newC3), negNormal, BLUE)
+    pushTriangle(createTriangle(newC4, newC5, newC6), negNormal, BLUE)
 
     var j1 = vec4.create(cStart * rad * Math.cos(ang), cStart * rad * Math.sin(ang), z);
     var j2 = vec4.create(cStart * rad * Math.cos(ang), cStart * rad * Math.sin(ang), -z);
@@ -48,14 +48,14 @@ function createInnerRing(options) {
     var j5 = j3;
     var j6 = vec4.create(cStart * rad * Math.cos(ang + angInc), cStart * rad * Math.sin(ang + angInc), -z);
 
-    pushTriangle(createTriangle(j1, j2, j3), calcNormalFromVec(j1, j2, j3), blue)
-    pushTriangle(createTriangle(j4, j5, j6), calcNormalFromVec(j4, j5, j6), blue)
+    pushTriangle(createTriangle(j1, j2, j3), calcNormalFromVec(j1, j2, j3), BLUE)
+    pushTriangle(createTriangle(j4, j5, j6), calcNormalFromVec(j4, j5, j6), BLUE)
 
 
     var jNorm = [cStart * rad * Math.cos(ang), cStart * rad * Math.sin(ang), 0]
 
-    pushTriangle(createTriangle(j1, j2, j3), jNorm, blue)
-    pushTriangle(createTriangle(j4, j5, j6), jNorm, blue)
+    pushTriangle(createTriangle(j1, j2, j3), jNorm, BLUE)
+    pushTriangle(createTriangle(j4, j5, j6), jNorm, BLUE)
 
     var j7 = vec4.create(cEnd * rad * Math.cos(ang), cEnd * rad * Math.sin(ang), z);
     var j8 = vec4.create(cEnd * rad * Math.cos(ang), cEnd * rad * Math.sin(ang), -z);
@@ -67,7 +67,6 @@ function createInnerRing(options) {
 
     jNorm = [cEnd * rad * Math.cos(ang), cEnd * rad * Math.sin(ang), 0]
 
-    pushTriangle(createTriangle(j7, j8, j9), jNorm, blue)
-    pushTriangle(createTriangle(j10, j11, j12), jNorm, blue)
+    pushTriangle(createTriangle(j7, j8, j9), jNorm, BLUE)
+    pushTriangle(createTriangle(j10, j11, j12), jNorm, BLUE)
 
-    
