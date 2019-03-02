@@ -44,7 +44,7 @@ const testColors = [0.019608, 1, 0.631373, 0.019608, 1, 0.631373, 0.019608, 1, 0
 
 const test0 = {
     toothCount: TOOTH_COUNT,
-    spokeCount: SPOKES,
+    spokeCount: SPOKE_COUNT,
     cStart: .2,
     cEnd: .45,
     dullness: RANK,
@@ -82,7 +82,7 @@ function createGear(options = {}) {
     var drawTooth = false
     const defaults = {
         toothCount: 54,
-        spokeCount: SPOKES,
+        spokeCount: SPOKE_COUNT,
         cStart: CENTER_INNER,
         cEnd: CENTER_OUTER,
         dullness: RANK,
@@ -111,7 +111,7 @@ function createGear(options = {}) {
 
     //SPOKE DRAWING LOOP
     angle = 0
-    var aStep = 2 * Math.PI / SPOKES
+    var aStep = 2 * Math.PI / SPOKE_COUNT
     for (let i = 0; i < options.spokeCount; i++) {
         var rotateMat = mat.create()
         mat.rotate(rotateMat, mat.toDegrees(angle + angInc), 0, 0, 1)
