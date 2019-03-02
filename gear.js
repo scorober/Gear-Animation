@@ -245,7 +245,8 @@ function initBuffers(gl, programInfo) {
     innerThickness: 0.05,
     teethHeight: .1,
     outerColor: PINK,
-    InnerColor: BLUE
+    innerColor: BLUE,
+    dullness: 4,
   }
 
   gearData = createGear(options);
