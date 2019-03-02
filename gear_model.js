@@ -40,8 +40,6 @@ var ang = 0;
 
 
 function createGear(options) {
-
-
     const defaults = {
         toothCount: TOOTH_COUNT,
         spokeCount: SPOKE_COUNT,
@@ -57,8 +55,6 @@ function createGear(options) {
         innerColor: BLUE,
         dullness: DULLNESS,
     }
-
-
 
     const opts = Object.assign(defaults, options)
 
@@ -250,16 +246,16 @@ function createSpoke(rotateMat, options) {
     var aStep = 2 * Math.PI / steps
     const cEnd = options.r2
     const r = options.spokeRad
-    const ringStart = options.r3
+    const height = options.r3
 
     for (var j = 0; j < steps; j++) {
         const v1 = vec4.create(r * Math.cos(angle), cEnd - .01, r * Math.sin(angle))
         const v2 = vec4.create(r * Math.cos(angle + aStep), cEnd -.01, r *   Math.sin(angle + aStep))
-        const v3 = vec4.create(r * Math.cos(angle + aStep), ringStart, r *  Math.sin(angle + aStep))
+        const v3 = vec4.create(r * Math.cos(angle + aStep), height, r *  Math.sin(angle + aStep))
 
         const v4 = vec4.create(r * Math.cos(angle), cEnd - .01, r * Math.sin(angle))
-        const v5 = vec4.create(r * Math.cos(angle + aStep), ringStart, r *   Math.sin(angle + aStep))
-        const v6 = vec4.create(r * Math.cos(angle), ringStart, r *  Math.sin(angle))
+        const v5 = vec4.create(r * Math.cos(angle + aStep), height, r *   Math.sin(angle + aStep))
+        const v6 = vec4.create(r * Math.cos(angle), height, r *  Math.sin(angle))
 
         const newV1 = vec4.create();
         mat.multiplyP4(newV1, rotateMat, v1)
@@ -289,13 +285,13 @@ function createSpoke(rotateMat, options) {
 
 function drawGearTooth(angleStep, options) {
 
-    const split = options.dullness > 1 ? options.dullness : 2;
+    const n = options.dullness > 1 ? options.dullness : 2;
     // const split = 4; //Adding this buffer bugged the gear. 4 is the safest value...
-    const s = split - 1;
+    const s = n - 1;
     const z = options.outerThickness;
     const outRad = RADIUS + options.teethHeight
     var inStep = 0.03;
-    var angStep = angleStep / split;
+    var angStep = angleStep / n;
 
     var rot0 = mat.create()
     mat.rotate(rot0, 180, 0, 1, 0)
