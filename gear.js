@@ -238,7 +238,7 @@ function initBuffers(gl, programInfo) {
   const options = {
     // toothCount: 14,
     // spokeCount: 8,
-    r1: 0.02,
+    r1: 0.40,
     r2: 0.42,
     // spokeRad: 0.05
   }

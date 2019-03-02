@@ -21,7 +21,7 @@ const rad = 1.0;
 const outRad = rad * 1.1;
 
 var ang = 0;
-var z = 0.1;
+// var z = 0.1;
 // var i; //  coin face, front & back
 const tRad = rad * 1.15
 const tStepIn = 0.05
@@ -35,7 +35,8 @@ const SPOKE_COUNT = 20
 const STEPS = 360
 const TOOTH_COUNT = 54  //10 or higher but not divisible by 4?
 const SPOKE_RAD = .03
-
+const EXO_INNER = 0.05
+const EXO_OUTER = 0.1
 
 //NEW CONSTANTS:
 const CENTER_INNER = 0.32
@@ -59,6 +60,9 @@ function createGear(options) {
         r1: CENTER_INNER,
         r2: CENTER_OUTER,
         spokeRad: SPOKE_RAD,
+        //InnerColor, OuterColor, TeethHeight, innerThickness, outerThickness
+        outerThickness: EXO_OUTER,
+        innerThickness: EXO_INNER
     }
 
 
@@ -67,9 +71,9 @@ function createGear(options) {
 
     //CREATE RINGS
     for (let i = 0; i < STEPS; i++) {
-        createOuterRing()
+        createOuterRing(o)
         createInnerRing(o)
-        drawCoinEdge()
+        drawCoinEdge(o)
         ang += angInc;
     }
 
@@ -82,7 +86,7 @@ function createGear(options) {
         if (drawTooth) {
             var rotateMat = mat.create()
             mat.rotate(rotateMat, mat.toDegrees(ang + tStep), 0, 0, 1)
-            drawGearTooth(tStep)
+            drawGearTooth(tStep, o)
         }
         ang += tStep
     } 
@@ -99,7 +103,8 @@ function createGear(options) {
     return [vertices, colors, normals]
 }
 
-function createOuterRing() {
+function createOuterRing(options) {
+    const z = options.outerThickness;
 
     var rotateMat = mat.create();
     var rotateRingInner = mat.create();
@@ -155,107 +160,96 @@ function createOuterRing() {
 }
 
 function createInnerRing(options) {
-
+    const z = options.innerThickness
     const cStart = options.r1
     const cEnd  = options.r2
-    var rotateMat = mat.create();
-    var rotateRingInner = mat.create();
+    const rotateMat = mat.create();
+    const rotateRingInner = mat.create();
 
     //Matrix to rotate front to back.
     mat.rotate(rotateMat, 180, 0, 1, 0);
     mat.rotate(rotateRingInner, 180, 0, 0, 1)
 
-    var c1 = vec4.create(cStart * rad * Math.cos(ang), cStart * rad * Math.sin(ang), z);
-    var c2 = vec4.create(cEnd * rad * Math.cos(ang), cEnd * rad * Math.sin(ang), z);
-    var c3 = vec4.create(cEnd * rad * Math.cos(ang + angInc), cEnd * rad * Math.sin(ang + angInc), z);
+    //Face of center circle
+    const c1 = vec4.create(cStart * rad * Math.cos(ang), cStart * rad * Math.sin(ang), z);
+    const c2 = vec4.create(cEnd * rad * Math.cos(ang), cEnd * rad * Math.sin(ang), z);
+    const c3 = vec4.create(cEnd * rad * Math.cos(ang + angInc), cEnd * rad * Math.sin(ang + angInc), z);
 
-    var c4 = vec4.create(cStart * rad * Math.cos(ang - angInc), cStart * rad * Math.sin(ang - angInc), z);
-    var c5 = vec4.create(cStart * rad * Math.cos(ang), cStart * rad * Math.sin(ang), z);
-    var c6 = vec4.create(cEnd * rad * Math.cos(ang), cEnd * rad * Math.sin(ang), z);
+    const c4 = vec4.create(cStart * rad * Math.cos(ang - angInc), cStart * rad * Math.sin(ang - angInc), z);
+    const c5 = vec4.create(cStart * rad * Math.cos(ang), cStart * rad * Math.sin(ang), z);
+    const c6 = vec4.create(cEnd * rad * Math.cos(ang), cEnd * rad * Math.sin(ang), z);
 
 
     pushTriangle(createTriangle(c1, c2, c3), posNormal, blue)
     pushTriangle(createTriangle(c4, c5, c6), posNormal, blue)
 
-    //Rotate and create reverse side.
-    var newC1 = vec4.create();
+    //Rotate and create reverse side of face
+    const newC1 = vec4.create();
     mat.multiplyP4(newC1, rotateMat, c1);
-    var newC2 = vec4.create();
+    const newC2 = vec4.create();
     mat.multiplyP4(newC2, rotateMat, c2);
-    var newC3 = vec4.create();
+    const newC3 = vec4.create();
     mat.multiplyP4(newC3, rotateMat, c3);
 
-    var newC4 = vec4.create()
+    const newC4 = vec4.create()
     mat.multiplyP4(newC4, rotateMat, c4)
-    var newC5 = vec4.create()
+    const newC5 = vec4.create()
     mat.multiplyP4(newC5, rotateMat, c5)
-    var newC6 = vec4.create()
+    const newC6 = vec4.create()
     mat.multiplyP4(newC6, rotateMat, c6)
 
     pushTriangle(createTriangle(newC1, newC2, newC3), negNormal, blue)
     pushTriangle(createTriangle(newC4, newC5, newC6), negNormal, blue)
 
-    var j1 = vec4.create(cStart * rad * Math.cos(ang), cStart * rad * Math.sin(ang), z);
-    var j2 = vec4.create(cStart * rad * Math.cos(ang), cStart * rad * Math.sin(ang), -z);
-    var j3 = vec4.create(cStart * rad * Math.cos(ang + angInc), cStart * rad * Math.sin(ang + angInc), z);
 
-    var j4 = vec4.create(cStart * rad * Math.cos(ang), cStart * rad * Math.sin(ang), -z);
-    var j5 = vec4.create(cStart * rad * Math.cos(ang + angInc), cStart * rad * Math.sin(ang + angInc), z);
-    var j6 = vec4.create(cStart * rad * Math.cos(ang + angInc), cStart * rad * Math.sin(ang + angInc), -z);
+    //Inner edges of center ring.
+    const j1 = vec4.create(cStart * rad * Math.cos(ang), cStart * rad * Math.sin(ang), z);
+    const j2 = vec4.create(cStart * rad * Math.cos(ang), cStart * rad * Math.sin(ang), -z);
+    const j3 = vec4.create(cStart * rad * Math.cos(ang + angInc), cStart * rad * Math.sin(ang + angInc), z);
 
-    var jNorm = [cStart * rad * Math.cos(ang), cStart * rad * Math.sin(ang), 0]
+    const j4 = j2;
+    const j5 = j3;
+    const j6 = vec4.create(cStart * rad * Math.cos(ang + angInc), cStart * rad * Math.sin(ang + angInc), -z);
 
-    pushTriangle(createTriangle(j1, j2, j3), jNorm, blue)
-    pushTriangle(createTriangle(j4, j5, j6), jNorm, blue)
+    //These normals are all mess up dawg
+    // pushTriangle(createTriangle(j1, j2, j3), calcNormalFromVec(j1, j2, j3), blue)
+    // pushTriangle(createTriangle(j4, j5, j6), calcNormalFromVec(j4, j5, j6), blue)
 
-    var j7 = vec4.create(cEnd * rad * Math.cos(ang), cEnd * rad * Math.sin(ang), z);
-    var j8 = vec4.create(cEnd * rad * Math.cos(ang), cEnd * rad * Math.sin(ang), -z);
-    var j9 = vec4.create(cEnd * rad * Math.cos(ang + angInc), cEnd * rad * Math.sin(ang + angInc), z);
+    const jNorm0 = [cStart * rad * Math.cos(ang), cStart * rad * Math.sin(ang), 0]
+    pushTriangle(createTriangle(j1, j2, j3), jNorm0, blue)
+    pushTriangle(createTriangle(j4, j5, j6), jNorm0, blue)
 
-    var j10 = vec4.create(cEnd * rad * Math.cos(ang), cEnd * rad * Math.sin(ang), -z);
-    var j11 = vec4.create(cEnd * rad * Math.cos(ang + angInc), cEnd * rad * Math.sin(ang + angInc), z);
-    var j12 = vec4.create(cEnd * rad * Math.cos(ang + angInc), cEnd * rad * Math.sin(ang + angInc), -z);
+    //Outer edges of center ring.
+    const j7 = vec4.create(cEnd * rad * Math.cos(ang), cEnd * rad * Math.sin(ang), z);
+    const j8 = vec4.create(cEnd * rad * Math.cos(ang), cEnd * rad * Math.sin(ang), -z);
+    const j9 = vec4.create(cEnd * rad * Math.cos(ang + angInc), cEnd * rad * Math.sin(ang + angInc), z);
 
-    jNorm = [cEnd * rad * Math.cos(ang), cEnd * rad * Math.sin(ang), 0]
+    const j10 = j8;
+    const j11 = j9;
+    const j12 = vec4.create(cEnd * rad * Math.cos(ang + angInc), cEnd * rad * Math.sin(ang + angInc), -z);
 
-    pushTriangle(createTriangle(j7, j8, j9), jNorm, blue)
-    pushTriangle(createTriangle(j10, j11, j12), jNorm, blue)
+    const jNorm1 = [cEnd * rad * Math.cos(ang), cEnd * rad * Math.sin(ang), 0]
+    pushTriangle(createTriangle(j7, j8, j9), jNorm1, blue)
+    pushTriangle(createTriangle(j10, j11, j12), jNorm1, blue)
 
 }
 
-function drawCoinEdge() {
-    var v1 = vec4.create(rad * Math.cos(ang), rad * Math.sin(ang), -z)
-    var v2 = vec4.create(rad * Math.cos(ang + angInc), rad * Math.sin(ang + angInc), -z)
-    var v3 = vec4.create(rad * Math.cos(ang + angInc), rad * Math.sin(ang + angInc), z)
+function drawCoinEdge(options) {
+    const z = options.outerThickness;
+    const v1 = vec4.create(rad * Math.cos(ang), rad * Math.sin(ang), -z)
+    const v2 = vec4.create(rad * Math.cos(ang + angInc), rad * Math.sin(ang + angInc), -z)
+    const v3 = vec4.create(rad * Math.cos(ang + angInc), rad * Math.sin(ang + angInc), z)
 
-    var v4 = vec4.create(rad * Math.cos(ang), rad * Math.sin(ang), -z)
-    var v5 = vec4.create(rad * Math.cos(ang + angInc), rad * Math.sin(ang + angInc), z)
-    var v6 = vec4.create(rad * Math.cos(ang), rad * Math.sin(ang), z)
+    const v4 = vec4.create(rad * Math.cos(ang), rad * Math.sin(ang), -z)
+    const v5 = vec4.create(rad * Math.cos(ang + angInc), rad * Math.sin(ang + angInc), z)
+    const v6 = vec4.create(rad * Math.cos(ang), rad * Math.sin(ang), z)
 
-    var norm0 = calcNormalFromVec(v1, v2, v3)
-    var norm1 = calcNormalFromVec(v4, v5, v6)
+    const norm0 = calcNormalFromVec(v1, v2, v3)
+    const norm1 = calcNormalFromVec(v4, v5, v6)
 
     pushTriangle(createTriangle(v1, v2, v3), norm0, pink)
     pushTriangle(createTriangle(v4, v5, v6), norm1, pink)
 }
-
-function drawToothRoof() {
-    var norm = [outRad * Math.cos(ang + angInc / 2), outRad * Math.sin(ang + angInc / 2), 0];
-    var v1 = vec4.create(outRad * Math.cos(ang), outRad * Math.sin(ang), -z)
-    var v2 = vec4.create(outRad * Math.cos(ang + angInc), outRad * Math.sin(ang + angInc), -z)
-    var v3 = vec4.create(outRad * Math.cos(ang + angInc), outRad * Math.sin(ang + angInc), z)
-    //XYZ of center of tooth roof
-
-
-    var v4 = vec4.create(outRad * Math.cos(ang), outRad * Math.sin(ang), -z)
-    var v5 = vec4.create(outRad * Math.cos(ang + angInc), outRad * Math.sin(ang + angInc), z)
-    var v6 = vec4.create(outRad * Math.cos(ang), outRad * Math.sin(ang), z)
-
-    pushTriangle(createTriangle(v1, v2, v3), norm, defaultColors)
-    pushTriangle(createTriangle(v4, v5, v6), norm, defaultColors)
-
-}
-
 
 function createSpoke(rotateMat, options) {
     var steps = 180
@@ -264,33 +258,33 @@ function createSpoke(rotateMat, options) {
     const r = options.spokeRad
 
     for (var j = 0; j < steps; j++) {
-        var v1 = vec4.create(r * Math.cos(angle), cEnd - .01, r * Math.sin(angle))
-        var v2 = vec4.create(r * Math.cos(angle + aStep), cEnd -.01, r *   Math.sin(angle + aStep))
-        var v3 = vec4.create(r * Math.cos(angle + aStep), ringStart, r *  Math.sin(angle + aStep))
+        const v1 = vec4.create(r * Math.cos(angle), cEnd - .01, r * Math.sin(angle))
+        const v2 = vec4.create(r * Math.cos(angle + aStep), cEnd -.01, r *   Math.sin(angle + aStep))
+        const v3 = vec4.create(r * Math.cos(angle + aStep), ringStart, r *  Math.sin(angle + aStep))
 
-        var v4 = vec4.create(r * Math.cos(angle), cEnd - .01, r * Math.sin(angle))
-        var v5 = vec4.create(r * Math.cos(angle + aStep), ringStart, r *   Math.sin(angle + aStep))
-        var v6 = vec4.create(r * Math.cos(angle), ringStart, r *  Math.sin(angle))
+        const v4 = vec4.create(r * Math.cos(angle), cEnd - .01, r * Math.sin(angle))
+        const v5 = vec4.create(r * Math.cos(angle + aStep), ringStart, r *   Math.sin(angle + aStep))
+        const v6 = vec4.create(r * Math.cos(angle), ringStart, r *  Math.sin(angle))
 
-        var newV1 = vec4.create();
+        const newV1 = vec4.create();
         mat.multiplyP4(newV1, rotateMat, v1)
-        var newV2 = vec4.create();
+        const newV2 = vec4.create();
         mat.multiplyP4(newV2, rotateMat, v2)
-        var newV3 = vec4.create();
+        const newV3 = vec4.create();
         mat.multiplyP4(newV3, rotateMat, v3)
-        var newV4 = vec4.create();
+        const newV4 = vec4.create();
         mat.multiplyP4(newV4, rotateMat, v4)
-        var newV5 = vec4.create();
+        const newV5 = vec4.create();
         mat.multiplyP4(newV5, rotateMat, v5)
-        var newV6 = vec4.create();
+        const newV6 = vec4.create();
         mat.multiplyP4(newV6, rotateMat, v6)
 
-        var norm0 = calcNormalFromVec(newV1, newV2, newV3)
-        var norm1 = calcNormalFromVec(newV4, newV5, newV6)
+        const norm0 = calcNormalFromVec(newV1, newV2, newV3)
+        const norm1 = calcNormalFromVec(newV4, newV5, newV6)
 
         // Blue to pink colors
-        var col1 = [0.004878, .803922, 0.996078, 0.004878, .803922, 0.996078, 1, .443137, 0.807843]
-        var col2 = [0.004878, .803922, 0.996078, 1, .443137, 0.807843, 1, .443137, 0.807843]
+        const col1 = [0.004878, .803922, 0.996078, 0.004878, .803922, 0.996078, 1, .443137, 0.807843]
+        const col2 = [0.004878, .803922, 0.996078, 1, .443137, 0.807843, 1, .443137, 0.807843]
 
         pushTriangle(createTriangle(newV1, newV2, newV3), norm0, col1)
         pushTriangle(createTriangle(newV4, newV5, newV6), norm1, col2)
@@ -298,9 +292,9 @@ function createSpoke(rotateMat, options) {
     }
 }
 
-function drawGearTooth(angleStep) {
+function drawGearTooth(angleStep, options) {
 
-
+    const z = options.outerThickness;
     var inStep = 0.03
     var angStep = angleStep / 4
 
