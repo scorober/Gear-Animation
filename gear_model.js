@@ -8,14 +8,22 @@ const vec4 = new Learn_webgl_point4();
 const vec3 = new Learn_webgl_vector3();
 
 
-const defaultColors = [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5]
-const BLUE = [0.004878, .803922, 0.996078, 0.004878, .803922, 0.996078, 0.004878, .803922, 0.996078]
-const PINK = [1, .443137, 0.807843, 1, .443137, 0.807843, 1, .443137, 0.807843]
-const testColors = [0.019608, 1, 0.631373, 0.019608, 1, 0.631373, 0.019608, 1, 0.631373]
-const negNormal = [0, 0, -1]
-const posNormal = [0, 0, 1]
+const GRAY = [0.5, 0.5, 0.5]
+const BLUE = [0.004878, .803922, 0.996078]
+const PINK = [1, .443137, 0.807843]
+const GREEN = [0.019608, 1, 0.631373]
+const METAL0 = [0.470588, 0.572549, 0.596078]
+const METAL1 = [0.6323529, 0.694118, 0.709804]
+const METAL2 = [0.38627, 0.462745, 0.482353]
+const METAL3 = [0.729412, 0.780392, 0.792157] //Lighter
 
+const BRASS0 = [181 / 255, 166 / 255, 66 / 255]
+const BRASS1 = [192 / 255, 177 / 255, 81 / 255]
+const BRASS2 = [163 / 255, 149 / 255, 59 / 255]
 
+const PURPLE = [122 / 255, 81 / 255, 192/ 255]
+const NEG_NORMAL = [0, 0, -1]
+const POS_NORMAL = [0, 0, 1]
 
 //Option defaults:
 const SPOKE_COUNT = 20
@@ -35,11 +43,90 @@ const EXO_INNER = 0.9
 const RADIUS = 1.0;
 const ANGINC = 2 * Math.PI / STEPS
 
+
+
+
+
+
+/*
+    USAGE EXAMPLE:
+    options = {
+        toothCount: Number of teeth on the gear.
+        spokeCount: Number of spokes.
+        r1: Inner radius of the center ring.
+        r2: Outer radius of the center ring.
+        spokeRad: Radius of the spoke cylinder.
+        outerThickness: Thickness of the outer ring and teeth.
+        innerThickness: .Thickness of the inner ring.
+        teethHeight: Heigh of the teeth.
+        outerColor: Outer color
+        innerColor: Inner color, the spokes have a color gradient from inner to outer.
+        toothOuterColor: Outer tooth color.
+        toothInnerColor: Inner tooth color, teeth have a gradient from inner to outer.
+        dullness: How 'sharp' the teeth appear. Lowest value is 2 where no roof is visible, values larger than
+            24 don't change much.
+    }
+*/
+
+const METAL_GEAR = {
+    toothCount: 16,
+    spokeCount: 16,
+    r1: 0.15,
+    r2: 0.32,
+    spokeRad: 0.03,
+    outerThickness: .1,
+    innerThickness: .06,
+    teethHeight: .1,
+    outerColor: METAL0,
+    innerColor: METAL1,
+    toothOuterColor: METAL3,
+    toothInnerColor: METAL2,
+    dullness: 4,
+}
+
+const OOF_GEAR = {
+    toothCount: 27,
+    spokeCount: 8,
+    r1: 0.15,
+    r2: 0.32,
+    spokeRad: 0.06,
+    outerThickness: .2,
+    innerThickness: .1,
+    teethHeight: .1,
+    outerColor: PINK,
+    innerColor: BLUE,
+    toothOuterColor: GREEN,
+    toothInnerColor: PINK,
+    dullness: 2,
+}
+
+const BRASSISH_GEAR = {
+    toothCount: 5,
+    spokeCount: 8,
+    r1: 0.05,
+    r2: 0.32,
+    spokeRad: 0.03,
+    outerThickness: .1,
+    innerThickness: .05,
+    teethHeight: .2,
+    outerColor: BRASS0,
+    innerColor: BRASS0,
+    toothOuterColor: BRASS1,
+    toothInnerColor: BRASS2,
+    dullness: 6,
+}
+
+
+
+
+
+
 //TODO move inside createGear!!!
-var ang = 0;
+// var ang = 0;
 
 
-function createGear(options) {
+function scottGear(options) {
+    var ang = 0;
     const defaults = {
         toothCount: TOOTH_COUNT,
         spokeCount: SPOKE_COUNT,
@@ -51,8 +138,10 @@ function createGear(options) {
         outerThickness: OUTER_THICKNESS,
         innerThickness: INNER_THICKNESS,
         teethHeight: TOOTH_HEIGHT,
-        outerColor: PINK,
+        outerColor: METAL1,
         innerColor: BLUE,
+        toothOuterColor: PINK,
+        toothInnerColor: PINK,
         dullness: DULLNESS,
     }
 
@@ -60,22 +149,24 @@ function createGear(options) {
 
     //CREATE RINGS
     for (let i = 0; i < STEPS; i++) {
-        createOuterRing(opts)
-        createInnerRing(opts)
-        drawCoinEdge(opts)
+        createOuterRing(opts, ang)
+        createInnerRing(opts, ang)
+        drawCoinEdge(opts, ang)
         ang += ANGINC;
     }
 
 
     ang = 0
-    var tStep = 2 * Math.PI / opts.toothCount
+    const tc = checkToothCount(opts.toothCount)
+    var tStep = 2 * Math.PI / tc
     var drawTooth = false
-    for (let i = 0; i < opts.toothCount; i++) {
+    console.log('tc', tc)
+    for (let i = 0; i < tc; i++) {
         drawTooth = !drawTooth
         if (drawTooth) {
             var rotateMat = mat.create()
             mat.rotate(rotateMat, mat.toDegrees(ang + tStep), 0, 0, 1)
-            drawGearTooth(tStep, opts)
+            drawGearTooth(tStep, opts, ang)
         }
         ang += tStep
     } 
@@ -92,9 +183,12 @@ function createGear(options) {
     return [vertices, colors, normals]
 }
 
-function createOuterRing(options) {
+function createOuterRing(options, ang) {
     const z = options.outerThickness;
     const ringStart = options.r3
+    const col = [options.outerColor[0], options.outerColor[1], options.outerColor[2], 
+                 options.outerColor[0], options.outerColor[1], options.outerColor[2],
+                 options.outerColor[0], options.outerColor[1], options.outerColor[2]];
     var rotateMat = mat.create();
     var rotateRingInner = mat.create();
     //Matrix to rotate front to back.
@@ -117,16 +211,16 @@ function createOuterRing(options) {
     const i2 = vec4.create(ringStart * RADIUS * Math.cos(ang + ANGINC), ringStart * RADIUS * Math.sin(ang + ANGINC), z);
     const i3 = vec4.create(ringStart * RADIUS * Math.cos(ang + ANGINC), ringStart * RADIUS * Math.sin(ang + ANGINC), -z);
 
-
     const norm0 = calcNormalFromVec(v1, v2, v3)
     const norm1 = calcNormalFromVec(v6, v5, v4)
 
-    const iNorm = [ringStart * RADIUS * Math.cos(ang), ringStart * RADIUS * Math.sin(ang), 0]
+    const iNorm = calcNormalFromVec(i1, i2, i3)
 
-    pushTriangle(createTriangle(v1, v2, v3), norm0, PINK)
-    pushTriangle(createTriangle(v4, v5, v6), norm1, PINK)
-    pushTriangle(createTriangle(v7, v8, v9), iNorm, PINK)
-    pushTriangle(createTriangle(i1, i2, i3), iNorm, PINK)
+    pushTriangle(createTriangle(v1, v2, v3), norm0, col)
+    pushTriangle(createTriangle(v4, v5, v6), norm1, col)
+    pushTriangle(createTriangle(v7, v8, v9), iNorm, col)
+    pushTriangle(createTriangle(i1, i2, i3), iNorm, col)
+
 
     //Rotate and create reverse side.
     var newV1 = vec4.create();
@@ -143,13 +237,16 @@ function createOuterRing(options) {
     var newV6 = vec4.create()
     mat.multiplyP4(newV6, rotateMat, v6)
 
-    pushTriangle(createTriangle(newV1, newV2, newV3), negNormal, PINK)
-    pushTriangle(createTriangle(newV4, newV5, newV6), negNormal, PINK)
+    pushTriangle(createTriangle(newV1, newV2, newV3), NEG_NORMAL, col)
+    pushTriangle(createTriangle(newV4, newV5, newV6), NEG_NORMAL, col)
 
 }
 
-function createInnerRing(options) {
+function createInnerRing(options, ang) {
     const z = options.innerThickness
+    const col = [options.innerColor[0], options.innerColor[1], options.innerColor[2],
+                options.innerColor[0], options.innerColor[1], options.innerColor[2],
+                options.innerColor[0], options.innerColor[1], options.innerColor[2]];
     const cStart = options.r1
     const cEnd  = options.r2
     const rotateMat = mat.create();
@@ -169,8 +266,8 @@ function createInnerRing(options) {
     const c6 = vec4.create(cEnd * RADIUS * Math.cos(ang), cEnd * RADIUS * Math.sin(ang), z);
 
 
-    pushTriangle(createTriangle(c1, c2, c3), posNormal, BLUE)
-    pushTriangle(createTriangle(c4, c5, c6), posNormal, BLUE)
+    pushTriangle(createTriangle(c1, c2, c3), POS_NORMAL, col)
+    pushTriangle(createTriangle(c4, c5, c6), POS_NORMAL, col)
 
     //Rotate and create reverse side of face
     const newC1 = vec4.create();
@@ -187,8 +284,8 @@ function createInnerRing(options) {
     const newC6 = vec4.create()
     mat.multiplyP4(newC6, rotateMat, c6)
 
-    pushTriangle(createTriangle(newC1, newC2, newC3), negNormal, BLUE)
-    pushTriangle(createTriangle(newC4, newC5, newC6), negNormal, BLUE)
+    pushTriangle(createTriangle(newC1, newC2, newC3), NEG_NORMAL, col)
+    pushTriangle(createTriangle(newC4, newC5, newC6), NEG_NORMAL, col)
 
 
     //Inner edges of center ring.
@@ -205,8 +302,8 @@ function createInnerRing(options) {
     // pushTriangle(createTriangle(j4, j5, j6), calcNormalFromVec(j4, j5, j6), blue)
 
     const jNorm0 = [cStart * RADIUS * Math.cos(ang), cStart * RADIUS * Math.sin(ang), 0]
-    pushTriangle(createTriangle(j1, j2, j3), jNorm0, BLUE)
-    pushTriangle(createTriangle(j4, j5, j6), jNorm0, BLUE)
+    pushTriangle(createTriangle(j1, j2, j3), jNorm0, col)
+    pushTriangle(createTriangle(j4, j5, j6), jNorm0, col)
 
     //Outer edges of center ring.
     const j7 = vec4.create(cEnd * RADIUS * Math.cos(ang), cEnd * RADIUS * Math.sin(ang), z);
@@ -218,13 +315,16 @@ function createInnerRing(options) {
     const j12 = vec4.create(cEnd * RADIUS * Math.cos(ang + ANGINC), cEnd * RADIUS * Math.sin(ang + ANGINC), -z);
 
     const jNorm1 = [cEnd * RADIUS * Math.cos(ang), cEnd * RADIUS * Math.sin(ang), 0]
-    pushTriangle(createTriangle(j7, j8, j9), jNorm1, BLUE)
-    pushTriangle(createTriangle(j10, j11, j12), jNorm1, BLUE)
+    pushTriangle(createTriangle(j7, j8, j9), jNorm1, col)
+    pushTriangle(createTriangle(j10, j11, j12), jNorm1, col)
 
 }
 
-function drawCoinEdge(options) {
+function drawCoinEdge(options, ang) {
     const z = options.outerThickness;
+    const col = [options.outerColor[0], options.outerColor[1], options.outerColor[2], 
+                options.outerColor[0], options.outerColor[1], options.outerColor[2],
+                options.outerColor[0], options.outerColor[1], options.outerColor[2]];
     const v1 = vec4.create(RADIUS * Math.cos(ang), RADIUS * Math.sin(ang), -z)
     const v2 = vec4.create(RADIUS * Math.cos(ang + ANGINC), RADIUS * Math.sin(ang + ANGINC), -z)
     const v3 = vec4.create(RADIUS * Math.cos(ang + ANGINC), RADIUS * Math.sin(ang + ANGINC), z)
@@ -236,8 +336,8 @@ function drawCoinEdge(options) {
     const norm0 = calcNormalFromVec(v1, v2, v3)
     const norm1 = calcNormalFromVec(v4, v5, v6)
 
-    pushTriangle(createTriangle(v1, v2, v3), norm0, PINK)
-    pushTriangle(createTriangle(v4, v5, v6), norm1, PINK)
+    pushTriangle(createTriangle(v1, v2, v3), norm0, col)
+    pushTriangle(createTriangle(v4, v5, v6), norm1, col)
 }
 
 function createSpoke(rotateMat, options) {
@@ -249,20 +349,25 @@ function createSpoke(rotateMat, options) {
     const height = options.r3
 
     for (var j = 0; j < steps; j++) {
+        //Create the spoke at initial point
         const v1 = vec4.create(r * Math.cos(angle), cEnd - .01, r * Math.sin(angle))
-        const v2 = vec4.create(r * Math.cos(angle + aStep), cEnd -.01, r *   Math.sin(angle + aStep))
-        const v3 = vec4.create(r * Math.cos(angle + aStep), height, r *  Math.sin(angle + aStep))
+        const v3 = vec4.create(r * Math.cos(angle + aStep), height, r * Math.sin(angle + aStep))
+        const v2 = vec4.create(r * Math.cos(angle + aStep), cEnd -.01, r * Math.sin(angle + aStep))
 
-        const v4 = vec4.create(r * Math.cos(angle), cEnd - .01, r * Math.sin(angle))
-        const v5 = vec4.create(r * Math.cos(angle + aStep), height, r *   Math.sin(angle + aStep))
-        const v6 = vec4.create(r * Math.cos(angle), height, r *  Math.sin(angle))
+        const v4 = v1;
+        const v5 = v3;
+        const v6 = vec4.create(r * Math.cos(angle), height, r * Math.sin(angle))
+    
+        const norm0 = calcNormalFromVec(v2, v1, v3);
 
+        //Rotate to new area
         const newV1 = vec4.create();
         mat.multiplyP4(newV1, rotateMat, v1)
         const newV2 = vec4.create();
         mat.multiplyP4(newV2, rotateMat, v2)
         const newV3 = vec4.create();
         mat.multiplyP4(newV3, rotateMat, v3)
+
         const newV4 = vec4.create();
         mat.multiplyP4(newV4, rotateMat, v4)
         const newV5 = vec4.create();
@@ -270,20 +375,29 @@ function createSpoke(rotateMat, options) {
         const newV6 = vec4.create();
         mat.multiplyP4(newV6, rotateMat, v6)
 
-        const norm0 = calcNormalFromVec(newV1, newV2, newV3)
-        const norm1 = calcNormalFromVec(newV4, newV5, newV6)
+        const outCol = options.outerColor;
+        const inCol = options.innerColor;
 
-        // Blue to pink colors
-        const col1 = [0.004878, .803922, 0.996078, 0.004878, .803922, 0.996078, 1, .443137, 0.807843]
-        const col2 = [0.004878, .803922, 0.996078, 1, .443137, 0.807843, 1, .443137, 0.807843]
+        const col1 = [inCol[0], inCol[1], inCol[2], inCol[0], inCol[1], inCol[2], outCol[0], outCol[1], outCol[2]]
+        const col2 = [inCol[0], inCol[1], inCol[2], outCol[0], outCol[1], outCol[2], outCol[0], outCol[1], outCol[2]]
 
         pushTriangle(createTriangle(newV1, newV2, newV3), norm0, col1)
-        pushTriangle(createTriangle(newV4, newV5, newV6), norm1, col2)
+        pushTriangle(createTriangle(newV4, newV5, newV6), norm0, col2)
+        
         angle += aStep
     }
 }
 
-function drawGearTooth(angleStep, options) {
+function drawGearTooth(angleStep, options, ang) {
+
+    const inCol = options.toothInnerColor;
+    const outCol = options.toothOuterColor;
+
+    const col0 = [outCol[0], outCol[1], outCol[2], outCol[0], outCol[1], outCol[2], outCol[0], outCol[1], outCol[2]];
+    const col1 = [inCol[0], inCol[1], inCol[2], inCol[0], inCol[1], inCol[2], outCol[0], outCol[1], outCol[2]];
+    const col2 = [inCol[0], inCol[1], inCol[2], outCol[0], outCol[1], outCol[2], outCol[0], outCol[1], outCol[2]];
+
+    const col3 = [inCol[0], inCol[1], inCol[2], outCol[0], outCol[1], outCol[2], inCol[0], inCol[1], inCol[2]]
 
     const n = options.dullness > 1 ? options.dullness : 2;
     // const split = 4; //Adding this buffer bugged the gear. 4 is the safest value...
@@ -294,7 +408,7 @@ function drawGearTooth(angleStep, options) {
     var angStep = angleStep / n;
 
     var rot0 = mat.create()
-    mat.rotate(rot0, 180, 0, 1, 0)
+    mat.rotate(rot0, 180, 0, 1, 0) //TOIDO WHAT?
     var v1 = vec4.create(RADIUS * Math.cos(ang), RADIUS * Math.sin(ang), -z)
     var v2 = vec4.create(outRad * Math.cos(ang + angStep), outRad * Math.sin(ang + angStep), -z + inStep)
     var v3 = vec4.create(outRad * Math.cos(ang + angStep), outRad * Math.sin(ang + angStep), z - inStep)
@@ -306,8 +420,8 @@ function drawGearTooth(angleStep, options) {
     var norm0 = calcNormalFromVec(v1, v2, v3)
     var norm1 = calcNormalFromVec(v4, v5, v6)
 
-    pushTriangle(createTriangle(v1, v2, v3), norm0, testColors)
-    pushTriangle(createTriangle(v4, v5, v6), norm1, testColors)
+    pushTriangle(createTriangle(v1, v2, v3), norm0, col2)
+    pushTriangle(createTriangle(v4, v5, v6), norm1, col3)
 
     var newV1 = vec4.create();
     mat.multiplyP4(newV1, rot0, v1);
@@ -316,6 +430,9 @@ function drawGearTooth(angleStep, options) {
     var newV3 = vec4.create();
     mat.multiplyP4(newV3, rot0, v3)
     var newNorm0 = vec4.create()
+
+
+    //TODO good?
     mat.multiplyP4(newNorm0, rot0, norm0)
 
     var norm1 = calcNormalFromVec(v4, v5, v6)
@@ -329,64 +446,58 @@ function drawGearTooth(angleStep, options) {
     var newNorm1 = vec4.create()
     mat.multiplyP4(newNorm1, rot0, norm1)
 
-    pushTriangle(createTriangle(newV1, newV2, newV3), newNorm0, testColors)
-    pushTriangle(createTriangle(newV4, newV5, newV6), newNorm1, testColors)
+    pushTriangle(createTriangle(newV1, newV2, newV3), newNorm0, col2)
+    pushTriangle(createTriangle(newV4, newV5, newV6), newNorm1, col2)
 
-    //Insert two triangles representing square of tooth face.
-    //FROM DRAW TOOTH FACE
+    const c1 = vec4.create(RADIUS * Math.cos(ang), RADIUS * Math.sin(ang), -z)
+    const c2 = vec4.create(RADIUS * Math.cos(ang + angleStep), RADIUS * Math.sin(ang + angleStep), -z)
+    const c3 = vec4.create(outRad * Math.cos(ang + s * angStep), outRad * Math.sin(ang + s * angStep), -z + inStep)
 
-    v1 = vec4.create(RADIUS * Math.cos(ang), RADIUS * Math.sin(ang), -z)
-    v2 = vec4.create(RADIUS * Math.cos(ang + angleStep), RADIUS * Math.sin(ang + angleStep), -z)
-    v3 = vec4.create(outRad * Math.cos(ang + s * angStep), outRad * Math.sin(ang + s * angStep), -z + inStep)
+    const c4 = vec4.create(RADIUS * Math.cos(ang), RADIUS * Math.sin(ang), -z)
+    const c5 = c3;
+    const c6 = vec4.create(outRad * Math.cos(ang + angStep), outRad * Math.sin(ang + angStep), -z + inStep)
 
-    //CHANGE V5 and V3...........
-    v4 = vec4.create(RADIUS * Math.cos(ang), RADIUS * Math.sin(ang), -z)
-    v5 = v3;
-    v6 = vec4.create(outRad * Math.cos(ang + angStep), outRad * Math.sin(ang + angStep), -z + inStep)
+    const normC0 = calcNormalFromVec(c1, c2, c3)
+    const normC1 = calcNormalFromVec(c4, c5, c6)
 
-    norm0 = calcNormalFromVec(v1, v2, v3)
-    norm1 = calcNormalFromVec(v4, v5, v6)
-
-    pushTriangle(createTriangle(v1, v2, v3), norm0, testColors)
-    pushTriangle(createTriangle(v4, v5, v6), norm1, testColors)
+    pushTriangle(createTriangle(c1, c2, c3), normC0, col1)
+    pushTriangle(createTriangle(c4, c5, c6), normC1, col2)
 
     
-    newV1 = vec4.create();
-    mat.multiplyP4(newV1, rot0, v1);
-    newV2 = vec4.create();
-    mat.multiplyP4(newV2, rot0, v2);
-    newV3 = vec4.create();
-    mat.multiplyP4(newV3, rot0, v3)
-    newNorm0 = vec4.create()
-    mat.multiplyP4(newNorm0, rot0, norm0)
+    const newC1 = vec4.create();
+    mat.multiplyP4(newC1, rot0, c1);
+    const newC2 = vec4.create();
+    mat.multiplyP4(newC2, rot0, c2);
+    const newC3 = vec4.create();
+    mat.multiplyP4(newC3, rot0, c3)
+    
 
-    norm1 = calcNormalFromVec(v4, v5, v6)
-    newV4 = vec4.create();
-    mat.multiplyP4(newV4, rot0, v4);
-    newV5 = vec4.create();
-    mat.multiplyP4(newV5, rot0, v5);
-    newV6 = vec4.create();
-    mat.multiplyP4(newV6, rot0, v6)
+    const newC4 = vec4.create();
+    mat.multiplyP4(newC4, rot0, c4);
+    const newC5 = vec4.create();
+    mat.multiplyP4(newC5, rot0, c5);
+    const newC6 = vec4.create();
+    mat.multiplyP4(newC6, rot0, c6)
 
-    var newNorm1 = vec4.create()
-    mat.multiplyP4(newNorm1, rot0, norm1)
+    const normC2 = calcNormalFromVec(newC1, newC2, newC3)
+    const normC3 = calcNormalFromVec(newC4, newC5, newC6)
 
-    pushTriangle(createTriangle(newV1, newV2, newV3), newNorm0, testColors)
-    pushTriangle(createTriangle(newV4, newV5, newV6), newNorm1, testColors)
+    pushTriangle(createTriangle(newC1, newC2, newC3), normC2, col1)
+    pushTriangle(createTriangle(newC4, newC5, newC6), normC3, col2)
 
     var r1 = vec4.create(outRad * Math.cos(ang + angStep), outRad * Math.sin(ang + angStep), -z + inStep)
     var r2 = vec4.create(outRad * Math.cos(ang + angStep), outRad * Math.sin(ang + angStep), z - inStep)
     var r3 = vec4.create(outRad * Math.cos(ang + s * angStep), outRad * Math.sin(ang + s * angStep), -z + inStep)
 
-    var normR = calcNormalFromVec(r1, r2, r3)
-    pushTriangle(createTriangle(r1, r2, r3), normR, testColors)
+    const normR0 = [outRad * Math.cos(ang + angStep), outRad * Math.sin(ang + angStep), 0]
+    pushTriangle(createTriangle(r1, r2, r3), normR0, col0)
         
     var r4 = vec4.create(outRad * Math.cos(ang + angStep), outRad * Math.sin(ang + angStep), z - inStep)
     var r5 = vec4.create(outRad * Math.cos(ang + angStep * s), outRad * Math.sin(ang + angStep * s), z - inStep)
     var r6 = vec4.create(outRad * Math.cos(ang + s * angStep), outRad * Math.sin(ang + s * angStep), -z + inStep)
 
-    normR = calcNormalFromVec(r4, r5, r6)
-    pushTriangle(createTriangle(r4, r5, r6), normR, testColors)
+    const normR1 = [outRad * Math.cos(ang + angStep), outRad * Math.sin(ang + angStep), 0]
+    pushTriangle(createTriangle(r4, r5, r6), normR1, col0)
 
 }
 
@@ -451,8 +562,29 @@ function calcNormalFromVec(v1, v2, v3) {
         vy = y3 - y1,
         vz = z3 - z1;
 
+    // const retVal =  [uy * vz - uz * vy,
+    //     uz * vx - ux * vz,
+    //     ux * vy - uy * vx
+    // ];
+
+    // Added a normal return........
+    // const d = Math.sqrt(retVal[0] * retVal[0] + retVal[1] * retVal[1] + retVal[2] * retVal[2])
+    // return [retVal[0] / d, retVal[1] / d, retVal[2] / d]
+
     return [uy * vz - uz * vy,
         uz * vx - ux * vz,
         ux * vy - uy * vx
     ];
+}
+
+function checkToothCount(tc) {
+    var retVal = tc * 2;
+    if (retVal % 4 === 0) {
+        retVal += 2;
+    }
+    // if (retVal % 2 === 1) {
+    //     retVal++;
+    //     retVal = checkToothCount(retVal)
+    // }
+    return retVal;
 }

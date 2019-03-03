@@ -76,7 +76,7 @@ const test0 = {
 
 
 */
-function createGear(options = {}) {
+function scottGear(options = {}) {
     var angle = 0
     // Making gear triangles
     var drawTooth = false

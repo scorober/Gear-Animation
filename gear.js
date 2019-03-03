@@ -38,10 +38,11 @@ function main() {
     
     // Original model data
     attribute vec3 a_Vertex;
-    attribute vec3 a_Color;
+    attribute vec3 a_color;
     attribute vec3 a_Vertex_normal;
     
     // Data (to be interpolated) that is passed on to the fragment shader
+    // Interpolated
     varying vec3 v_Vertex;
     varying vec4 v_Color;
     varying vec3 v_Normal;
@@ -57,7 +58,7 @@ function main() {
       v_Normal = vec3( u_VM_transform * vec4(a_Vertex_normal, 0.0) );
     
       // Pass the vertex's color to the fragment shader.
-      v_Color = vec4(a_Color, 1.0);
+      v_Color = vec4(a_color, 1.0);
     
       // Transform the location of the vertex for the rest of the graphics pipeline
       gl_Position = u_PVM_transform * vec4(a_Vertex, 1.0);
@@ -75,6 +76,7 @@ function main() {
     uniform vec3 u_Light_position;
     uniform vec3 u_Light_color;
     uniform float u_Shininess;
+    uniform vec3 u_Ambient_color;
     
     // Data coming from the vertex shader
     varying vec3 v_Vertex;
@@ -88,9 +90,13 @@ function main() {
       vec3 reflection;
       vec3 to_camera;
       float cos_angle;
+      vec3 diffuse_color;
       vec3 specular_color;
-      vec3 object_color;
+      vec3 ambient_color;
       vec3 color;
+    
+      // Calculate the ambient color as a percentage of the surface color
+      ambient_color = u_Ambient_color * vec3(v_Color);
     
       // Calculate a vector from the fragment location to the light source
       to_light = u_Light_position - v_Vertex;
@@ -99,6 +105,14 @@ function main() {
       // The vertex's normal vector is being interpolated across the primitive
       // which can make it un-normalized. So normalize the vertex's normal vector.
       vertex_normal = normalize( v_Normal );
+    
+      // Calculate the cosine of the angle between the vertex's normal vector
+      // and the vector going to the light.
+      cos_angle = dot(vertex_normal, to_light);
+      cos_angle = clamp(cos_angle, 0.0, 1.0);
+    
+      // Scale the color of this fragment based on its angle to the light.
+      diffuse_color = vec3(v_Color) * cos_angle;
     
       // Calculate the reflection vector
       reflection = 2.0 * dot(vertex_normal,to_light) * vertex_normal - to_light;
@@ -115,11 +129,15 @@ function main() {
       cos_angle = clamp(cos_angle, 0.0, 1.0);
       cos_angle = pow(cos_angle, u_Shininess);
     
-      // If this fragment gets a specular reflection, use the light's color,
-      // otherwise use the objects's color
-      specular_color = u_Light_color * cos_angle;
-      object_color = vec3(v_Color) * (1.0 - cos_angle);
-      color = specular_color + object_color;
+      // The specular color is from the light source, not the object
+      if (cos_angle > 0.0) {
+        specular_color = u_Light_color * cos_angle;
+        diffuse_color = diffuse_color * (1.0 - cos_angle);
+      } else {
+        specular_color = vec3(0.0, 0.0, 0.0);
+      }
+    
+      color = ambient_color + diffuse_color + specular_color;
     
       gl_FragColor = vec4(color, v_Color.a);
     }
@@ -139,13 +157,14 @@ function main() {
     program: shaderProgram,
     locations: {
       a_vertex: gl.getAttribLocation(shaderProgram, 'a_Vertex'),
-      a_color: gl.getAttribLocation(shaderProgram, 'a_Color'),
+      a_color: gl.getAttribLocation(shaderProgram, 'a_color'),
       a_normal: gl.getAttribLocation(shaderProgram, 'a_Vertex_normal'),
       u_PVM_transform: gl.getUniformLocation(shaderProgram, 'u_PVM_transform'),
       u_VM_transform: gl.getUniformLocation(shaderProgram, 'u_VM_transform'),
       u_Light_position : gl.getUniformLocation(shaderProgram, 'u_Light_position'),
       u_Light_color: gl.getUniformLocation(shaderProgram, 'u_Light_color'),
       u_Shininess: gl.getUniformLocation(shaderProgram, 'u_Shininess'),
+      u_Ambient_color: gl.getUniformLocation(shaderProgram, 'u_Ambient_Color')
     },
   };
 
@@ -184,21 +203,25 @@ function main() {
 // have one object -- a simple two-dimensional square.
 //
 function initBuffers(gl, programInfo) {
+
+
   const options = {
     toothCount: 54,
-    spokeCount: 8,
-    r1: 0.40,
-    r2: 0.42,
-    spokeRad: 0.05,
-    outerThickness: 0.05,
-    innerThickness: 0.05,
+    spokeCount: 16,
+    r1: 0.15,
+    r2: 0.32,
+    spokeRad: 0.03,
+    outerThickness: .1,
+    innerThickness: .06,
     teethHeight: .1,
-    outerColor: PINK,
-    innerColor: BLUE,
+    outerColor: METAL0,
+    innerColor: METAL1,
+    toothOuterColor: METAL3,
+    toothInnerColor: METAL2,
     dullness: 4,
   }
 
-  gearData = createGear(options);
+  gearData = scottGear(METAL_GEAR);
   const vertices = gearData[0];
   const colors = gearData[1];
   const normals = gearData[2];
@@ -348,18 +371,11 @@ function drawScene(gl, programInfo, buffers, angle_x, angle_y) {
   gl.uniformMatrix4fv(programInfo.locations.u_VM_transform,
     false, vm_transform);
 
+  gl.uniform3f(programInfo.locations.u_Light_position, 2, 2, 6);
+  gl.uniform3f(programInfo.locations.u_Light_color, 1, 1, 1);
+  gl.uniform3f(programInfo.locations.u_Ambient_color, 1, 1, 1);
+  gl.uniform1f(programInfo.locations.u_Shininess, 15);
   
-
-
-  //DEFAULT CODE::::
-  const transform = matrix.create();
-  matrix.multiplySeries(transform, proj, lookat, rotate_x_matrix,
-    rotate_y_matrix, scale);
-  // Set the shader program's uniform
-  gl.uniformMatrix4fv(programInfo.locations.u_transform,
-    false, transform);
-  gl.uniform3f(programInfo.locations.u_light_dir, 1.0, 1.0, -1.0);
-
   { // now tell the shader (GPU program) to draw some triangles
     const offset = 0;
     gl.drawArrays(gl.TRIANGLES, offset, buffers.num_vertices);
