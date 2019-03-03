@@ -205,6 +205,10 @@ function main() {
 function initBuffers(gl, programInfo) {
 
 
+
+  //See scottGear() for example options and defaults. 
+
+  //Create your own options here!
   const options = {
     toothCount: 54,
     spokeCount: 16,
@@ -214,14 +218,15 @@ function initBuffers(gl, programInfo) {
     outerThickness: .1,
     innerThickness: .06,
     teethHeight: .1,
-    outerColor: METAL0,
-    innerColor: METAL1,
-    toothOuterColor: METAL3,
-    toothInnerColor: METAL2,
+    // outerColor: METAL0,
+    // innerColor: METAL1,
+    // toothOuterColor: METAL3,
+    // toothInnerColor: METAL2,
     dullness: 4,
+    noRoof: true
   }
 
-  gearData = scottGear(METAL_GEAR);
+  gearData = scottGear(options);
   const vertices = gearData[0];
   const colors = gearData[1];
   const normals = gearData[2];
