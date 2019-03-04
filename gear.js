@@ -183,7 +183,7 @@ function main() {
         angle_x += 3;
       }
 
-      drawScene(gl, programInfo, buffers, angle_x, angle_y, angle_z);
+      drawScene(gl, programInfo, buffers, angle_x, angle_y, angle_z,);
       return false;
     })
 
@@ -193,16 +193,25 @@ function main() {
 
   enableAttributes(gl, buffers, programInfo)
 
-
-  
+  var lookat = 0
+  var lStep = 0.0165
   self.animate = function () {
+    angle_x += .15
     angle_z += .15
     angle_y += .15
+    lookat += lStep;
+    if (lookat > 3) {
+      lStep = -lStep
+    }
+    if (lookat <= -3) {
+      lStep = -lStep;
+    }
+
     // Draw the scene
-    drawScene(gl, programInfo, buffers, angle_x, angle_y, angle_z);
+    drawScene(gl, programInfo, buffers, angle_x, angle_y, angle_z, lookat);
     requestAnimationFrame(self.animate)
   }
-  
+
   self.animate()
 
 
@@ -342,7 +351,7 @@ function enableAttributes(gl, buffers, programInfo) {
 //
 // Draw the scene.
 //
-function drawScene(gl, programInfo, buffers, angle_x, angle_y, angle_z) {
+function drawScene(gl, programInfo, buffers, angle_x, angle_y, angle_z, la) {
   const matrix = new Learn_webgl_matrix();
   gl.clearColor(1.0, 1.0, 1.0, 1.0); // Clear to white, fully opaque
   gl.clearDepth(1.0); // Clear everything
@@ -371,7 +380,7 @@ function drawScene(gl, programInfo, buffers, angle_x, angle_y, angle_z) {
 
   //make lookat
   const lookat = matrix.create()
-  matrix.lookAt(lookat, 0, 0, 5, 0, 0, 0, 0, 1, 0);
+  matrix.lookAt(lookat, 0, la, 5, 0, la, 0, 0, 1, 0);
 
   //make projection matrix
   const proj = matrix.createOrthographic(-1, 1, -1, 1, 3, 7)
