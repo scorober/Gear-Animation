@@ -17,6 +17,7 @@ function main() {
 
   var angle_x = 0;
   var angle_y = 0;
+  var angle_z = 0;
 
 
   // Vertex shader program, runs on GPU, once per vertex
@@ -182,7 +183,7 @@ function main() {
         angle_x += 3;
       }
 
-      drawScene(gl, programInfo, buffers, angle_x, angle_y);
+      drawScene(gl, programInfo, buffers, angle_x, angle_y, angle_z);
       return false;
     })
 
@@ -192,8 +193,19 @@ function main() {
 
   enableAttributes(gl, buffers, programInfo)
 
-  // Draw the scene
-  drawScene(gl, programInfo, buffers, angle_x, angle_y);
+
+  
+  self.animate = function () {
+    angle_z += .15
+    angle_y += .15
+    // Draw the scene
+    drawScene(gl, programInfo, buffers, angle_x, angle_y, angle_z);
+    requestAnimationFrame(self.animate)
+  }
+  
+  self.animate()
+
+
 }
 
 //
@@ -217,7 +229,7 @@ function initBuffers(gl, programInfo) {
     spokeRad: 0.03,
     outerThickness: .1,
     innerThickness: .06,
-    teethHeight: .1,
+    teethHeight: .03,
     // outerColor: METAL0,
     // innerColor: METAL1,
     // toothOuterColor: METAL3,
@@ -226,7 +238,7 @@ function initBuffers(gl, programInfo) {
     noRoof: true
   }
 
-  gearData = scottGear(options);
+  gearData = scottGear(METAL_GEAR);
   const vertices = gearData[0];
   const colors = gearData[1];
   const normals = gearData[2];
@@ -330,7 +342,7 @@ function enableAttributes(gl, buffers, programInfo) {
 //
 // Draw the scene.
 //
-function drawScene(gl, programInfo, buffers, angle_x, angle_y) {
+function drawScene(gl, programInfo, buffers, angle_x, angle_y, angle_z) {
   const matrix = new Learn_webgl_matrix();
   gl.clearColor(1.0, 1.0, 1.0, 1.0); // Clear to white, fully opaque
   gl.clearDepth(1.0); // Clear everything
@@ -347,9 +359,11 @@ function drawScene(gl, programInfo, buffers, angle_x, angle_y) {
   //make transform to implement interactive rotation
   const rotate_x_matrix = matrix.create();
   const rotate_y_matrix = matrix.create();
+  const rotate_z_matrix = matrix.create();
   
   matrix.rotate(rotate_x_matrix, angle_x, 1, 0, 0);
   matrix.rotate(rotate_y_matrix, angle_y, 0, 1, 0);
+  matrix.rotate(rotate_z_matrix, angle_z, 0, 0, 1);
 
   //make scale transform
   const scale = matrix.create();
@@ -365,7 +379,7 @@ function drawScene(gl, programInfo, buffers, angle_x, angle_y) {
   //Create the PVM transformation
   matrix.multiplySeries()
   const pvm_transform = matrix.create(); 
-  matrix.multiplySeries(pvm_transform, proj, lookat, rotate_x_matrix,
+  matrix.multiplySeries(pvm_transform, proj, lookat, rotate_z_matrix, rotate_x_matrix,
     rotate_y_matrix, scale);
   gl.uniformMatrix4fv(programInfo.locations.u_PVM_transform,
     false, pvm_transform);

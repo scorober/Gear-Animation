@@ -122,6 +122,8 @@ function scottGear(options) {
             spokeCount: Number of spokes.
             r1: Inner radius of the center ring.
             r2: Outer radius of the center ring.
+            r3: Inner radius of outer ring.
+            r4: Outer radius of outer ring.
             spokeRad: Radius of the spoke cylinder.
             outerThickness: Thickness of the outer ring and teeth.
             innerThickness: .Thickness of the inner ring.
@@ -154,12 +156,63 @@ function scottGear(options) {
         noRoof: false
     }
 
+
+
+
     const opts = Object.assign(defaults, options);
+
+    // Added last minute. Extra details on the rings can be made by calling createInner/createOuterRing()
+    // with custom objects like these.
+    const ring0 = {
+        r1: opts.r1 * 1.4,
+        r2: opts.r1 * 1.5,
+        innerColor: METAL2,
+        innerThickness: opts.innerThickness * 1.15
+    }
+
+    const ring1 = {
+        r1: opts.r1,
+        r2: opts.r1 * 1.3,
+        innerColor: METAL2,
+        innerThickness: opts.innerThickness * 1.15
+    }
+    
+    ring2 = {
+        r1: opts.r2 * 1.0015,
+        r2: opts.r2 * 0.95,
+        innerColor: METAL2,
+        innerThickness: opts.innerThickness * 1.15
+    }
+
+    ring3 = {
+        r3: opts.r3 * 0.95,
+        r4: opts.r3,
+        outerColor: METAL2,
+        outerThickness: opts.innerThickness * 1.15
+    }
+
+    //These options behave a bit differently, adding these in the call to createSpokes() 
+    // will create three capped cylinders around the spoke. 
+    const spokeFeatures = {
+        innerColor: METAL0,
+        outerColor: METAL2,
+        centerColor: PINK,
+        zScale1: 1.6,  // Scale factor of the spokes radius around the Z axis. 
+        hScale1: 0.86,  // Start of endcap
+        hScale2: 0.9,  // End of first/ start of last endcap
+        hScale3: 0.36  // Height of cap coming out center.
+    }
+
+
 
     //CREATE RINGS
     for (let i = 0; i < STEPS; i++) {
         createOuterRing(opts, ang);
+        createOuterRing(ring3, ang);
         createInnerRing(opts, ang);
+        createInnerRing(ring0, ang)
+        createInnerRing(ring1, ang)
+        createInnerRing(ring2, ang)
         drawCoinEdge(opts, ang);
         ang += ANGINC;
     }
@@ -177,8 +230,6 @@ function scottGear(options) {
             var rotateMat = mat.create();
             mat.rotate(rotateMat, mat.toDegrees(ang + tStep), 0, 0, 1);
             drawGearTooth(tStep, opts, ang);
-        } else {
-            //TODO move drawCoinEdge here...
         }
         ang += tStep;
     }
@@ -189,7 +240,8 @@ function scottGear(options) {
     for (let j = 0; j < opts.spokeCount; j++) {
         var rotateMat = mat.create();
         mat.rotate(rotateMat, mat.toDegrees(ang + aStep), 0, 0, 1);
-        createSpoke(rotateMat, opts);
+        createSpoke(rotateMat, opts, spokeFeatures);
+        // createSpoke(rotateMat, opts);
         ang += aStep;
     }
 
@@ -312,10 +364,6 @@ function createInnerRing(options, ang) {
     const j5 = j3;
     const j6 = vec4.create(cStart * RADIUS * Math.cos(ang + ANGINC), cStart * RADIUS * Math.sin(ang + ANGINC), -z);
 
-    //These normals are all mess up dawg
-    // pushTriangle(createTriangle(j1, j2, j3), calcNormalFromVec(j1, j2, j3), blue)
-    // pushTriangle(createTriangle(j4, j5, j6), calcNormalFromVec(j4, j5, j6), blue)
-
     const jNorm0 = [cStart * RADIUS * Math.cos(ang), cStart * RADIUS * Math.sin(ang), 0];
     pushTriangle(createTriangle(j1, j2, j3), jNorm0, col);
     pushTriangle(createTriangle(j4, j5, j6), jNorm0, col);
@@ -332,6 +380,8 @@ function createInnerRing(options, ang) {
     const jNorm1 = [cEnd * RADIUS * Math.cos(ang), cEnd * RADIUS * Math.sin(ang), 0];
     pushTriangle(createTriangle(j7, j8, j9), jNorm1, col);
     pushTriangle(createTriangle(j10, j11, j12), jNorm1, col);
+
+
 
 }
 
@@ -356,7 +406,14 @@ function drawCoinEdge(options, ang) {
     pushTriangle(createTriangle(v4, v5, v6), norm1, col);
 }
 
-function createSpoke(rotateMat, options) {
+/**
+ * 
+ * 
+ * @param {learn_webgl_matrix} rotateMat 
+ * @param {Object} options 
+ * @param {Object} spokeFeatures If present spokes will create their own features.
+ */
+function createSpoke(rotateMat, options, spokeFeatures) {
     var steps = 180;
     var angle = 0;
     var aStep = 2 * Math.PI / steps;
@@ -374,22 +431,22 @@ function createSpoke(rotateMat, options) {
         const v5 = v3;
         const v6 = vec4.create(r * Math.cos(angle), height, r * Math.sin(angle));
 
-        const norm0 = calcNormalFromVec(v2, v1, v3);
+        var norm0 = calcNormalFromVec(v2, v1, v3);
 
         //Rotate to new area
         const newV1 = vec4.create();
-        mat.multiplyP4(newV1, rotateMat, v1)
+        mat.multiplyP4(newV1, rotateMat, v1);
         const newV2 = vec4.create();
-        mat.multiplyP4(newV2, rotateMat, v2)
+        mat.multiplyP4(newV2, rotateMat, v2);
         const newV3 = vec4.create();
-        mat.multiplyP4(newV3, rotateMat, v3)
+        mat.multiplyP4(newV3, rotateMat, v3);
 
         const newV4 = vec4.create();
-        mat.multiplyP4(newV4, rotateMat, v4)
+        mat.multiplyP4(newV4, rotateMat, v4);
         const newV5 = vec4.create();
-        mat.multiplyP4(newV5, rotateMat, v5)
+        mat.multiplyP4(newV5, rotateMat, v5);
         const newV6 = vec4.create();
-        mat.multiplyP4(newV6, rotateMat, v6)
+        mat.multiplyP4(newV6, rotateMat, v6);
 
         const outCol = options.outerColor;
         const inCol = options.innerColor;
@@ -400,8 +457,121 @@ function createSpoke(rotateMat, options) {
         pushTriangle(createTriangle(newV1, newV2, newV3), norm0, col1);
         pushTriangle(createTriangle(newV4, newV5, newV6), norm0, col2);
 
+        if (spokeFeatures) {
+            createSpokeFeatures(rotateMat, options, angle, aStep,  spokeFeatures) 
+        }
+        
         angle += aStep;
     }
+}
+
+function createSpokeFeatures(rotateMat, options, angle, aStep, sf) {
+    const cEnd = options.r2;
+    const r = options.spokeRad;
+    const height = options.r3;
+
+    const outCol = sf.outerColor;
+    const inCol = sf.innerColor;
+    const centCol = sf.centerColor;
+
+    const col1 = [inCol[0], inCol[1], inCol[2], inCol[0], inCol[1], inCol[2], outCol[0], outCol[1], outCol[2]];
+    const col2 = [inCol[0], inCol[1], inCol[2], outCol[0], outCol[1], outCol[2], outCol[0], outCol[1], outCol[2]];
+    const col3 = [inCol[0], inCol[1], inCol[2], inCol[0], inCol[1], inCol[2], inCol[0], inCol[1], inCol[2]];
+    const col4 = [centCol[0], centCol[1], centCol[2], centCol[0], centCol[1], centCol[2], centCol[0], centCol[1], centCol[2]]
+
+
+    //SPOKE CAPS????????????????
+    const zScale1 = sf.zScale1
+    const hScale1 = sf.hScale1
+    const hScale2 = sf.hScale2
+
+
+    const e1 = vec4.create(r /* zScale1*/ * Math.cos(angle), height * hScale1, r /* zScale1*/ * Math.sin(angle));
+    const e3 = vec4.create(r * zScale1 * Math.cos(angle + aStep), height * hScale2, r * zScale1  * Math.sin(angle + aStep));
+    const e2 = vec4.create(r /* zScale1*/ * Math.cos(angle + aStep),  height * hScale1, r /* zScale1 */* Math.sin(angle + aStep));
+
+    // const e4 = v1;
+    // const e5 = v3;
+    const e4 = e1;
+    const e5 = e3;
+    const e6 = vec4.create(r * zScale1 * Math.cos(angle), height * hScale2, r * zScale1 * Math.sin(angle));
+
+    const newE1 = vec4.create();
+    const newE2 = vec4.create();
+    const newE3 = vec4.create();
+    const newE4 = vec4.create();
+    const newE5 = vec4.create();
+    const newE6 = vec4.create();
+
+    mat.multiplyP4(newE1, rotateMat, e1)
+    mat.multiplyP4(newE2, rotateMat, e2)
+    mat.multiplyP4(newE3, rotateMat, e3)
+    mat.multiplyP4(newE4, rotateMat, e4)
+    mat.multiplyP4(newE5, rotateMat, e5)
+    mat.multiplyP4(newE6, rotateMat, e6)
+
+    norm0 = calcNormalFromVec(e2, e1, e3)
+    pushTriangle(createTriangle(newE1, newE2, newE3), norm0, col3);
+    pushTriangle(createTriangle(newE4, newE5, newE6), norm0, col3);
+
+
+    const d1 = vec4.create(r * zScale1 * Math.cos(angle), height * hScale2, r * zScale1 * Math.sin(angle));
+    const d3 = vec4.create(r * zScale1 * Math.cos(angle + aStep), height, r * zScale1 * Math.sin(angle + aStep));
+    const d2 = vec4.create(r * zScale1 * Math.cos(angle + aStep),  height * hScale2, r * zScale1 * Math.sin(angle + aStep));
+
+    // const d4 = v1;
+    // const d5 = v3;
+    const d4 = d1;
+    const d5 = d3;
+    const d6 = vec4.create(r * zScale1 * Math.cos(angle), height, r * zScale1 * Math.sin(angle));
+
+    const newD1 = vec4.create();
+    const newD2 = vec4.create();
+    const newD3 = vec4.create();
+    const newD4 = vec4.create();
+    const newD5 = vec4.create();
+    const newD6 = vec4.create();
+
+    mat.multiplyP4(newD1, rotateMat, d1)
+    mat.multiplyP4(newD2, rotateMat, d2)
+    mat.multiplyP4(newD3, rotateMat, d3)
+    mat.multiplyP4(newD4, rotateMat, d4)
+    mat.multiplyP4(newD5, rotateMat, d5)
+    mat.multiplyP4(newD6, rotateMat, d6)
+
+    norm0 = calcNormalFromVec(d2, d1, d3)
+    pushTriangle(createTriangle(newD1, newD2, newD3), norm0, col1);
+    pushTriangle(createTriangle(newD4, newD5, newD6), norm0, col2);
+
+
+    const hScale3 = sf.hScale3;
+
+    const f1 = vec4.create(r * zScale1 * Math.cos(angle), cEnd, r * zScale1 * Math.sin(angle));
+    const f3 = vec4.create(r * Math.cos(angle + aStep), height * hScale3, r * Math.sin(angle + aStep));
+    const f2 = vec4.create(r * zScale1 * Math.cos(angle + aStep),  cEnd, r * zScale1  * Math.sin(angle + aStep));
+
+    // const d4 = v1;
+    // const d5 = v3;
+    const f4 = f1;
+    const f5 = f3;
+    const f6 = vec4.create(r * Math.cos(angle), height * hScale3, r * Math.sin(angle));
+    const newF1 = vec4.create();
+    const newF2 = vec4.create();
+    const newF3 = vec4.create();
+    const newF4 = vec4.create();
+    const newF5 = vec4.create();
+    const newF6 = vec4.create();
+
+    mat.multiplyP4(newF1, rotateMat, f1)
+    mat.multiplyP4(newF2, rotateMat, f2)
+    mat.multiplyP4(newF3, rotateMat, f3)
+    mat.multiplyP4(newF4, rotateMat, f4)
+    mat.multiplyP4(newF5, rotateMat, f5)
+    mat.multiplyP4(newF6, rotateMat, f6)
+
+    norm0 = calcNormalFromVec(newF2, newF1, newF3)
+    pushTriangle(createTriangle(newF1, newF2, newF3), norm0, col4);
+    pushTriangle(createTriangle(newF4, newF5, newF6), norm0, col4);
 }
 
 function drawGearTooth(angleStep, options, ang) {
