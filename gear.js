@@ -17,8 +17,6 @@ function main() {
 
   var angle_x = 0;
   var angle_y = 0;
-  var angle_z = 0;
-
 
   // Vertex shader program, runs on GPU, once per vertex
 
@@ -183,71 +181,104 @@ function main() {
         angle_x += 3;
       }
 
-      drawScene(gl, programInfo, buffers, angle_x, angle_y, angle_z,);
+      drawScene(gl, programInfo, gears, angle_x, angle_y);
       return false;
     })
 
+  // const buff1 = initBuffers(gl, programInfo, new scottGear(METAL_GEAR))
+  // const buff2 = initBuffers(gl, programInfo, new scottGear(METAL_GEAR))
+  // console.log(buff2)
+  // const buff3 = initBuffers(gl, programInfo, new scottGear(METAL_GEAR))
+  // console.log(buff2)
+
+  // const buff1 = new scottGear(METAL_GEAR)
+  // const buff2 = new scottGear(METAL_GEAR)
+  // console.log(buff2)
+  // const buff3 = new scottGear(METAL_GEAR)
+  // console.log(buff2)
 
   // build the object(s) we'll be drawing, put the data in buffers
-  const buffers = initBuffers(gl, programInfo);
+  const gears = {
+    gear0: {
+      buffers: initBuffers(gl, programInfo, new scottGear(METAL_GEAR0)),
+      scale: [.25, .25, .25],
+      translate: [.3766, .375, 0],
+      z_rot: 0,
+      z_inc: 0.15,
+    },
+    gear1: {
+      buffers: initBuffers(gl, programInfo, new scottGear(METAL_GEAR0)),
+      scale: [.25, .25, .25],
+      translate: [0, 0, 0],
+      z_rot: 0,
+      z_inc: -0.15
+    },
+    gear2: {
+      buffers:  initBuffers(gl, programInfo, new scottGear(METAL_GEAR0)),
+      scale: [.25, .25, .25],
+      translate: [-.3766, 0.375, 0],
+      z_rot: 0,
+      z_inc: 0.15
+    },
+    gear3: {
+      buffers: initBuffers(gl, programInfo, new scottGear(METAL_GEAR0)),
+      scale: [.25, .25, .25],
+      translate: [-.3766 * 2, 0, 0],
+      z_rot: 0,
+      z_inc: -0.15
+    },
+    gear4: {
+      buffers: initBuffers(gl, programInfo, new scottGear(METAL_GEAR0)),
+      scale: [.25, .25, .25],
+      translate: [.3766 * 2, 0, 0],
+      z_rot: 0,
+      z_inc: -0.15
+    }
+  }
 
-  enableAttributes(gl, buffers, programInfo)
+  for (const key in gears) {
+    const buffers = gears[key].buffers
+    enableAttributes(gl, buffers, programInfo)
+  }
+
 
   var lookat = 0
-  var lStep = 0.0165
+
+  const C_STEPS = 500
+  var cStep = 1 / C_STEPS
+  var lStep = 0.00165
+  const ambient = [1, 1, 1]
   self.animate = function () {
-    angle_x += .15
-    angle_z += .15
-    angle_y += .15
+    for (const key in gears) {
+      const gear = gears[key]
+      gear.z_rot += gear.z_inc
+    }
+    var col = ambient[0]
+    if (col <= 0 || col >= 1) {
+      cStep = -cStep
+    }
+    ambient[0] += cStep
+    ambient[2] += cStep / 2
     lookat += lStep;
-    if (lookat > 3) {
+    if (lookat > 2.25 || lookat <= -2.25) {
       lStep = -lStep
     }
-    if (lookat <= -3) {
-      lStep = -lStep;
-    }
-
     // Draw the scene
-    drawScene(gl, programInfo, buffers, angle_x, angle_y, angle_z, lookat);
+    //Angle_x/y reserved for user rotation
+    drawScene(gl, programInfo, gears, angle_x, angle_y, lookat, ambient);
     requestAnimationFrame(self.animate)
   }
 
   self.animate()
-
-
 }
 
-//
-// initBuffers
-//
-// Initialize the buffers we'll need. For this demo, we just
-// have one object -- a simple two-dimensional square.
-//
-function initBuffers(gl, programInfo) {
 
 
-
-  //See scottGear() for example options and defaults. 
-
-  //Create your own options here!
-  const options = {
-    toothCount: 54,
-    spokeCount: 16,
-    r1: 0.15,
-    r2: 0.32,
-    spokeRad: 0.03,
-    outerThickness: .1,
-    innerThickness: .06,
-    teethHeight: .03,
-    // outerColor: METAL0,
-    // innerColor: METAL1,
-    // toothOuterColor: METAL3,
-    // toothInnerColor: METAL2,
-    dullness: 4,
-    noRoof: true
-  }
-
-  gearData = scottGear(METAL_GEAR);
+/**
+ *  Initialize the buffers we'll need. For this demo, we just
+ *  have one object -- a simple two-dimensional square.
+ */
+function initBuffers(gl, programInfo, gearData) {
   const vertices = gearData[0];
   const colors = gearData[1];
   const normals = gearData[2];
@@ -294,7 +325,6 @@ function initBuffers(gl, programInfo) {
   };
 
 }
-
 
 
 function enableAttributes(gl, buffers, programInfo) {
@@ -351,7 +381,7 @@ function enableAttributes(gl, buffers, programInfo) {
 //
 // Draw the scene.
 //
-function drawScene(gl, programInfo, buffers, angle_x, angle_y, angle_z, la) {
+function drawScene(gl, programInfo, gears, angle_x, angle_y, la, amb) {
   const matrix = new Learn_webgl_matrix();
   gl.clearColor(1.0, 1.0, 1.0, 1.0); // Clear to white, fully opaque
   gl.clearDepth(1.0); // Clear everything
@@ -361,53 +391,66 @@ function drawScene(gl, programInfo, buffers, angle_x, angle_y, angle_z, la) {
   // Clear the canvas before we start drawing on it.
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-
-  
-  // const vm_transform = matrix.create();
-
   //make transform to implement interactive rotation
   const rotate_x_matrix = matrix.create();
   const rotate_y_matrix = matrix.create();
-  const rotate_z_matrix = matrix.create();
-  
   matrix.rotate(rotate_x_matrix, angle_x, 1, 0, 0);
   matrix.rotate(rotate_y_matrix, angle_y, 0, 1, 0);
-  matrix.rotate(rotate_z_matrix, angle_z, 0, 0, 1);
 
-  //make scale transform
-  const scale = matrix.create();
-  matrix.scale(scale, 0.8, 0.8, 0.8);
+  for (const key in gears) {
+    const gear = gears[key]
+    const buffers = gear.buffers
+    const s = gear.scale ? gear.scale : [1, 1, 1]
+    const t = gear.translate ? gear.translate : [0, 0, 0]
+    const z = gear.z_rot ? gear.z_rot : 0
 
-  //make lookat
-  const lookat = matrix.create()
-  matrix.lookAt(lookat, 0, la, 5, 0, la, 0, 0, 1, 0);
+    //make z rotation transform
+    const rotate_z_matrix = matrix.create();
+    matrix.rotate(rotate_z_matrix, z, 0, 0, 1);
 
-  //make projection matrix
-  const proj = matrix.createOrthographic(-1, 1, -1, 1, 3, 7)
-  
-  //Create the PVM transformation
-  matrix.multiplySeries()
-  const pvm_transform = matrix.create(); 
-  matrix.multiplySeries(pvm_transform, proj, lookat, rotate_z_matrix, rotate_x_matrix,
-    rotate_y_matrix, scale);
-  gl.uniformMatrix4fv(programInfo.locations.u_PVM_transform,
-    false, pvm_transform);
+    //make gear scale transform
+    const scale = matrix.create();
+    matrix.scale(scale, s[0], s[1], s[2]);
+    
+    //make gear translate transform
+    const translate = matrix.create()
+    matrix.translate(translate, t[0], t[1], t[2])
 
-  const vm_transform = matrix.create()
-  matrix.multiplySeries(vm_transform, lookat, rotate_x_matrix,
-    rotate_y_matrix, scale)
-  gl.uniformMatrix4fv(programInfo.locations.u_VM_transform,
-    false, vm_transform);
+    //make lookat
+    const lookat = matrix.create()
+    matrix.lookAt(lookat, la, 0, 5, la, 0, 0, 0, 1, 0);
 
-  gl.uniform3f(programInfo.locations.u_Light_position, 2, 2, 6);
-  gl.uniform3f(programInfo.locations.u_Light_color, 1, 1, 1);
-  gl.uniform3f(programInfo.locations.u_Ambient_color, 1, 1, 1);
-  gl.uniform1f(programInfo.locations.u_Shininess, 15);
-  
-  { // now tell the shader (GPU program) to draw some triangles
+    //make projection matrix
+    const proj = matrix.createFrustum(-1, 1, -1, 1, 3, 7)
+    
+    //Create the PVM transformation
+    matrix.multiplySeries()
+    const pvm_transform = matrix.create(); 
+    matrix.multiplySeries(pvm_transform, proj, lookat, translate, rotate_x_matrix,
+      rotate_y_matrix, rotate_z_matrix, scale);
+    gl.uniformMatrix4fv(programInfo.locations.u_PVM_transform,
+      false, pvm_transform);
+
+    const vm_transform = matrix.create()
+    matrix.multiplySeries(vm_transform, lookat, rotate_x_matrix,
+      rotate_y_matrix, rotate_z_matrix, scale)
+    gl.uniformMatrix4fv(programInfo.locations.u_VM_transform,
+      false, vm_transform);
+
+    // now tell the shader (GPU program) to draw some triangles
     const offset = 0;
     gl.drawArrays(gl.TRIANGLES, offset, buffers.num_vertices);
+    
   }
+  gl.uniform3f(programInfo.locations.u_Light_position, 2, 3, 4);
+  gl.uniform1f(programInfo.locations.u_Shininess, 18);
+
+  // gl.uniform3f(programInfo.locations.u_Light_color,  amb[0], amb[1], amb[2]);
+  // gl.uniform3f(programInfo.locations.u_Ambient_color, 1, 1, 1);
+
+  gl.uniform3f(programInfo.locations.u_Light_color,  1, 1, 1);
+  gl.uniform3f(programInfo.locations.u_Ambient_color,amb[0], amb[1], amb[2]);
+
 }
 
 //

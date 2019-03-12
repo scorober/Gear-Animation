@@ -58,6 +58,23 @@ const METAL_GEAR = {
     toothOuterColor: METAL3,
     toothInnerColor: METAL2,
     dullness: 4,
+    noRoof: true
+}
+const METAL_GEAR0 = {
+    toothCount: 54,
+    spokeCount: 16,
+    r1: 0.15,
+    r2: 0.32,
+    spokeRad: 0.03,
+    outerThickness: .1,
+    innerThickness: .06,
+    teethHeight: .1,
+    outerColor: METAL0,
+    innerColor: METAL1,
+    toothOuterColor: METAL3,
+    toothInnerColor: METAL2,
+    dullness: 4,
+    // noRoof: true
 }
 
 const METAL_SKINNY = {
