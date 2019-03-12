@@ -199,41 +199,41 @@ function main() {
 
   // build the object(s) we'll be drawing, put the data in buffers
   const gears = {
-    gear0: {
-      buffers: initBuffers(gl, programInfo, new scottGear(METAL_GEAR0)),
-      scale: [.25, .25, .25],
-      translate: [.3766, .375, 0],
-      z_rot: 0,
-      z_inc: 0.15,
-    },
+    // gear0: {
+    //   buffers: initBuffers(gl, programInfo, scottGear(METAL_GEAR0)),
+    //   scale: [.25, .25, .25],
+    //   translate: [.3766, .375, 0],
+    //   z_rot: 0,
+    //   z_inc: 0.15,
+    // },
     gear1: {
-      buffers: initBuffers(gl, programInfo, new scottGear(METAL_GEAR0)),
+      buffers: initBuffers(gl, programInfo, createOxfordGear(16, 8, 600, 10, 3, .5, .683, .568, .15)),
       scale: [.25, .25, .25],
       translate: [0, 0, 0],
       z_rot: 0,
       z_inc: -0.15
     },
-    gear2: {
-      buffers:  initBuffers(gl, programInfo, new scottGear(METAL_GEAR0)),
-      scale: [.25, .25, .25],
-      translate: [-.3766, 0.375, 0],
-      z_rot: 0,
-      z_inc: 0.15
-    },
+    // gear2: {
+    //   buffers:  initBuffers(gl, programInfo, createBMathewGear(16, 8, 10, 10, 50, 60, 1, 50, 5, .5, .53, .1)),
+    //   scale: [.25, .25, .25],
+    //   translate: [-.3766, 0.375, 0],
+    //   z_rot: 0,
+    //   z_inc: 0.15
+    // },
     gear3: {
-      buffers: initBuffers(gl, programInfo, new scottGear(METAL_GEAR0)),
+      buffers: initBuffers(gl, programInfo, scottGear(METAL_GEAR0)),
       scale: [.25, .25, .25],
       translate: [-.3766 * 2, 0, 0],
       z_rot: 0,
       z_inc: -0.15
     },
-    gear4: {
-      buffers: initBuffers(gl, programInfo, new scottGear(METAL_GEAR0)),
-      scale: [.25, .25, .25],
-      translate: [.3766 * 2, 0, 0],
-      z_rot: 0,
-      z_inc: -0.15
-    }
+    // gear4: {
+    //   buffers: initBuffers(gl, programInfo, scottGear(METAL_GEAR0)),
+    //   scale: [.25, .25, .25],
+    //   translate: [.3766 * 2, 0, 0],
+    //   z_rot: 0,
+    //   z_inc: -0.15
+    // }
   }
 
   for (const key in gears) {
@@ -419,6 +419,7 @@ function drawScene(gl, programInfo, gears, angle_x, angle_y, la, amb) {
     //make lookat
     const lookat = matrix.create()
     matrix.lookAt(lookat, la, 0, 5, la, 0, 0, 0, 1, 0);
+    
 
     //make projection matrix
     const proj = matrix.createFrustum(-1, 1, -1, 1, 3, 7)
