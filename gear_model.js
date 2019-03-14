@@ -1,8 +1,8 @@
 //  build the object, including geometry (triangle vertices)
 //  and possibly colors and normals for each vertex
-const vertices = [];
-const colors = [];
-const normals = [];
+var vertices
+var colors
+var normals 
 const mat = new Learn_webgl_matrix();
 const vec4 = new Learn_webgl_point4();
 const vec3 = new Learn_webgl_vector3();
@@ -94,13 +94,13 @@ const METAL_SKINNY = {
 }
 
 const OOF_GEAR = {
-    toothCount: 27,
+    toothCount: 32,
     spokeCount: 8,
     r1: 0.15,
     r2: 0.32,
     spokeRad: 0.06,
-    outerThickness: .2,
-    innerThickness: .1,
+    outerThickness: .75,
+    innerThickness: .2,
     teethHeight: .1,
     outerColor: PINK,
     innerColor: BLUE,
@@ -132,6 +132,9 @@ const BRASSISH_GEAR = {
  */
 function scottGear(options) {
     var ang = 0;
+    vertices = []
+    colors = []
+    normals = []
     /*
         USAGE EXAMPLE:
         options = {
@@ -170,7 +173,9 @@ function scottGear(options) {
         toothOuterColor: METAL3,
         toothInnerColor: METAL2,
         dullness: DULLNESS,
-        noRoof: false
+        noRoof: false,
+        spokeOptions: true,
+        createRings: true
     }
 
 
@@ -225,11 +230,15 @@ function scottGear(options) {
     //CREATE RINGS
     for (let i = 0; i < STEPS; i++) {
         createOuterRing(opts, ang);
-        createOuterRing(ring3, ang);
+        
         createInnerRing(opts, ang);
-        createInnerRing(ring0, ang)
-        createInnerRing(ring1, ang)
-        createInnerRing(ring2, ang)
+
+        if (opts.createRings) {
+            createOuterRing(ring3, ang);
+            createInnerRing(ring0, ang)
+            createInnerRing(ring1, ang)
+            createInnerRing(ring2, ang)
+        }
         drawCoinEdge(opts, ang);
         ang += ANGINC;
     }
@@ -257,8 +266,14 @@ function scottGear(options) {
     for (let j = 0; j < opts.spokeCount; j++) {
         var rotateMat = mat.create();
         mat.rotate(rotateMat, mat.toDegrees(ang + aStep), 0, 0, 1);
-        createSpoke(rotateMat, opts, spokeFeatures);
-        // createSpoke(rotateMat, opts);
+        if (opts.spokeOptions === true) {
+            createSpoke(rotateMat, opts, spokeFeatures);
+        } else {
+            console.log('hell')
+            createSpoke(rotateMat, opts);
+        }
+        
+  
         ang += aStep;
     }
 

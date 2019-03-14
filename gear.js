@@ -76,6 +76,7 @@ function main() {
     uniform vec3 u_Light_color;
     uniform float u_Shininess;
     uniform vec3 u_Ambient_color;
+    uniform float u_Diffuse_Factor;
     
     // Data coming from the vertex shader
     varying vec3 v_Vertex;
@@ -90,12 +91,14 @@ function main() {
       vec3 to_camera;
       float cos_angle;
       vec3 diffuse_color;
+      float diffuse_factor;
       vec3 specular_color;
       vec3 ambient_color;
       vec3 color;
     
       // Calculate the ambient color as a percentage of the surface color
       ambient_color = u_Ambient_color * vec3(v_Color);
+      diffuse_factor = u_Diffuse_Factor;
     
       // Calculate a vector from the fragment location to the light source
       to_light = u_Light_position - v_Vertex;
@@ -111,7 +114,7 @@ function main() {
       cos_angle = clamp(cos_angle, 0.0, 1.0);
     
       // Scale the color of this fragment based on its angle to the light.
-      diffuse_color = vec3(v_Color) * cos_angle;
+      diffuse_color = vec3(v_Color) * cos_angle * diffuse_factor;
     
       // Calculate the reflection vector
       reflection = 2.0 * dot(vertex_normal,to_light) * vertex_normal - to_light;
@@ -163,7 +166,8 @@ function main() {
       u_Light_position : gl.getUniformLocation(shaderProgram, 'u_Light_position'),
       u_Light_color: gl.getUniformLocation(shaderProgram, 'u_Light_color'),
       u_Shininess: gl.getUniformLocation(shaderProgram, 'u_Shininess'),
-      u_Ambient_color: gl.getUniformLocation(shaderProgram, 'u_Ambient_Color')
+      u_Ambient_color: gl.getUniformLocation(shaderProgram, 'u_Ambient_Color'),
+      u_Diffuse_Factor: gl.getUniformLocation(shaderProgram, 'u_Diffuse_Factor')
     },
   };
 
@@ -184,61 +188,136 @@ function main() {
       drawScene(gl, programInfo, gears, angle_x, angle_y);
       return false;
     })
+  const cylinder = {
+    toothCount: 15,
+    spokeCount: 0,
+    r1: 0,
+    r2: 1,
+    spokeRad: 0,
+    outerThickness: 7,
+    innerThickness: 7,
+    teethHeight: 0,
+    outerColor: METAL0,
+    innerColor: METAL1,
+    toothOuterColor: METAL3,
+    toothInnerColor: METAL2,
+    dullness: 4,
+    noRoof: true,
+    spokeOptions: false,
+    createRings: false
+  }
 
-  // const buff1 = initBuffers(gl, programInfo, new scottGear(METAL_GEAR))
-  // const buff2 = initBuffers(gl, programInfo, new scottGear(METAL_GEAR))
-  // console.log(buff2)
-  // const buff3 = initBuffers(gl, programInfo, new scottGear(METAL_GEAR))
-  // console.log(buff2)
+  const base = {
+    toothCount: 15,
+    spokeCount: 0,
+    r1: 0,
+    r2: 1,
+    r3: .9,
+    r4: 1,
+    spokeRad: 0,
+    outerThickness: .1,
+    innerThickness: .1,
+    teethHeight: 0,
+    outerColor: BLUE,
+    innerColor: METAL3,
+    toothOuterColor: METAL3,
+    toothInnerColor: METAL2,
+    dullness: 4,
+    noRoof: true,
+    spokeOptions: false,
+    createRings: false
+  }
+  const buff0 = initBuffers(gl, programInfo, scottGear(METAL_GEAR))
+  const buff1 = initBuffers(gl, programInfo, scottGear(OOF_GEAR))
+  const buff2 = initBuffers(gl, programInfo, createBMathewGear(30, 8, 70, 70, 85, 95, 5, 5, 5, METAL0[0], METAL0[1], METAL0[2]))
+  const buff3 = initBuffers(gl, programInfo, createOxfordGear(30, 10, 500, 7, 5, .25, METAL3[0] * 255, METAL3[1] * 255, METAL3[2] * 255))
+  const buff4 = initBuffers(gl, programInfo, osbornemGear(10, 10))
+  const buff5 = initBuffers(gl, programInfo, tovarGear(30, 4))
+  const buff6 = initBuffers(gl, programInfo, scottGear(cylinder))
+  const buff7 = initBuffers(gl, programInfo, scottGear(cylinder))
+  const buff8 = initBuffers(gl, programInfo, scottGear(METAL_SKINNY))
+  const buff9 = initBuffers(gl, programInfo, scottGear(base))
 
-  // const buff1 = new scottGear(METAL_GEAR)
-  // const buff2 = new scottGear(METAL_GEAR)
-  // console.log(buff2)
-  // const buff3 = new scottGear(METAL_GEAR)
-  // console.log(buff2)
-
-  // build the object(s) we'll be drawing, put the data in buffers
+  //TODO use an array instead
   const gears = {
-    // gear0: {
-    //   buffers: initBuffers(gl, programInfo, scottGear(METAL_GEAR0)),
-    //   scale: [.25, .25, .25],
-    //   translate: [.3766, .375, 0],
-    //   z_rot: 0,
-    //   z_inc: 0.15,
-    // },
+    gear0: {
+      buffers: buff0,
+      scale: [.25, .25, .25],
+      translate: [.3766, .375, -.1],
+      z_rot: 0,
+      z_inc: 0.15,
+    },
     gear1: {
-      buffers: initBuffers(gl, programInfo, createOxfordGear(16, 8, 600, 10, 3, .5, .683, .568, .15)),
+      buffers:  buff1,
       scale: [.25, .25, .25],
       translate: [0, 0, 0],
       z_rot: 0,
       z_inc: -0.15
     },
-    // gear2: {
-    //   buffers:  initBuffers(gl, programInfo, createBMathewGear(16, 8, 10, 10, 50, 60, 1, 50, 5, .5, .53, .1)),
-    //   scale: [.25, .25, .25],
-    //   translate: [-.3766, 0.375, 0],
-    //   z_rot: 0,
-    //   z_inc: 0.15
-    // },
+    gear2: {
+      buffers: buff2,
+      scale: [.45, .45, .45],
+      translate: [-.525, 0.525, 0],
+      z_rot: 0,
+      z_inc: 0.101
+    },
     gear3: {
-      buffers: initBuffers(gl, programInfo, scottGear(METAL_GEAR0)),
+      buffers: buff3, //oxford
       scale: [.25, .25, .25],
-      translate: [-.3766 * 2, 0, 0],
+      translate: [-.2, .375, .75],
       z_rot: 0,
       z_inc: -0.15
     },
-    // gear4: {
-    //   buffers: initBuffers(gl, programInfo, scottGear(METAL_GEAR0)),
-    //   scale: [.25, .25, .25],
-    //   translate: [.3766 * 2, 0, 0],
-    //   z_rot: 0,
-    //   z_inc: -0.15
-    // }
+    gear4: {
+      buffers: buff4, //osborne
+      scale: [.1, .1, .1],
+      translate: [-.19050, -.03, .75],
+      z_rot: 0,
+      z_inc: 0.465
+    },
+    gear5: {
+      buffers: buff5,
+      scale: [.25, .25, .25],
+      translate: [.3766, .375, .75],
+      z_rot: 0,
+      z_inc: .15
+    },
+    gear6: {
+      buffers: buff6,
+      scale: [.06, .06, .06],
+      translate: [.3766, .375, .35],
+      z_rot: 0,
+      z_inc: 0.15,
+    },
+    gear7: {
+      buffers: buff7,
+      scale: [.06, .06, .06],
+      translate: [-.19050, -.03, .75 + .4],
+      z_rot: 0,
+      z_inc: 0.465,
+    },
+    gear8: {
+      buffers: buff9,
+      scale: [2, 2, 2],
+      translate: [0, -1, 0],
+      z_rot: 0,
+      z_inc: 0,
+      x_rot: 90
+    }
   }
 
-  for (const key in gears) {
-    const buffers = gears[key].buffers
-    enableAttributes(gl, buffers, programInfo)
+  var sawZ = 0.8
+  for (let i = 9; i < 9 + 26; i++) {
+    const rot = Math.floor(i % 2) === 0 ? 0.465 : -0.465
+    const gear = {
+      buffers: buff8,
+      scale: [.07, .07, .07],
+      translate: [-.1905, -.03, sawZ],
+      z_rot: 0,
+      z_inc: rot
+    }
+    gears['gear' + i] = gear
+    sawZ += 0.03
   }
 
 
@@ -248,7 +327,47 @@ function main() {
   var cStep = 1 / C_STEPS
   var lStep = 0.00165
   const ambient = [1, 1, 1]
+  var t = 0
+  const STEPS = 800
+  const dStep = 1/ (STEPS / 2)
+  var diffuse = 0
   self.animate = function () {
+    t++
+    if (t > STEPS) {
+      t = 0
+    }
+    if (diffuse < 1) {
+      diffuse += dStep
+    }
+    
+    console.log(diffuse)
+    var camera_location = [0,0,0];
+
+    var control_points = [
+                           [-7, -7,  -1],
+                           [3, 6,   -1],
+                           [0, 4.5, -20],
+                           [-3,3,  -60],                                                                           
+                         ];
+  
+     // t/100.0
+     var cp;
+  
+    //y = (1 − t)3, green: y= 3(1 − t)2 t, red: y= 3(1 − t) t2, and cyan: y = t3
+  
+     function weight(t) {
+         return [  Math.pow(1-t,3), 3*Math.pow(1-t,2)*t, 3*(1-t)*Math.pow(t,2), Math.pow(t,3) ];
+     }
+  
+     weights = weight(t/1000);
+     
+     for (cp = 0; cp < 4; cp++ ) {
+           
+           camera_location[0] += weights[cp] * control_points[cp][0];
+           camera_location[1] += weights[cp] * control_points[cp][1];
+           camera_location[2] += weights[cp] * control_points[cp][2];
+  
+    }    
     for (const key in gears) {
       const gear = gears[key]
       gear.z_rot += gear.z_inc
@@ -257,15 +376,17 @@ function main() {
     if (col <= 0 || col >= 1) {
       cStep = -cStep
     }
+
+    camera_location = [0, 3, 5]
     ambient[0] += cStep
     ambient[2] += cStep / 2
-    lookat += lStep;
-    if (lookat > 2.25 || lookat <= -2.25) {
-      lStep = -lStep
-    }
+    // lookat += lStep;
+    // if (lookat > 2.25 || lookat <= -2.25) {
+    //   lStep = -lStep
+    // }
     // Draw the scene
     //Angle_x/y reserved for user rotation
-    drawScene(gl, programInfo, gears, angle_x, angle_y, lookat, ambient);
+    drawScene(gl, programInfo, gears, angle_x, angle_y, camera_location, diffuse);
     requestAnimationFrame(self.animate)
   }
 
@@ -328,7 +449,6 @@ function initBuffers(gl, programInfo, gearData) {
 
 
 function enableAttributes(gl, buffers, programInfo) {
-
   const numComponents = 3;
   const type = gl.FLOAT;
   const normalize = false;
@@ -381,7 +501,7 @@ function enableAttributes(gl, buffers, programInfo) {
 //
 // Draw the scene.
 //
-function drawScene(gl, programInfo, gears, angle_x, angle_y, la, amb) {
+function drawScene(gl, programInfo, gears, angle_x, angle_y, cam, diffuse) {
   const matrix = new Learn_webgl_matrix();
   gl.clearColor(1.0, 1.0, 1.0, 1.0); // Clear to white, fully opaque
   gl.clearDepth(1.0); // Clear everything
@@ -391,22 +511,32 @@ function drawScene(gl, programInfo, gears, angle_x, angle_y, la, amb) {
   // Clear the canvas before we start drawing on it.
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-  //make transform to implement interactive rotation
-  const rotate_x_matrix = matrix.create();
-  const rotate_y_matrix = matrix.create();
-  matrix.rotate(rotate_x_matrix, angle_x, 1, 0, 0);
-  matrix.rotate(rotate_y_matrix, angle_y, 0, 1, 0);
 
   for (const key in gears) {
+
+    //make transform to implement interactive rotation
+    const rotate_x_matrix = matrix.create();
+    const rotate_y_matrix = matrix.create();
+    matrix.rotate(rotate_x_matrix, angle_x, 1, 0, 0);
+    matrix.rotate(rotate_y_matrix, angle_y, 0, 1, 0);
+
+
     const gear = gears[key]
     const buffers = gear.buffers
+
     const s = gear.scale ? gear.scale : [1, 1, 1]
     const t = gear.translate ? gear.translate : [0, 0, 0]
     const z = gear.z_rot ? gear.z_rot : 0
+    const x = gear.x_rot ? gear.x_rot : 0
+
 
     //make z rotation transform
     const rotate_z_matrix = matrix.create();
     matrix.rotate(rotate_z_matrix, z, 0, 0, 1);
+
+    if (gear.x_rot) {
+      matrix.rotate(rotate_x_matrix, gear.x_rot, 1, 0, 0)
+    }    
 
     //make gear scale transform
     const scale = matrix.create();
@@ -418,11 +548,12 @@ function drawScene(gl, programInfo, gears, angle_x, angle_y, la, amb) {
 
     //make lookat
     const lookat = matrix.create()
-    matrix.lookAt(lookat, la, 0, 5, la, 0, 0, 0, 1, 0);
+    matrix.lookAt(lookat, cam[0], cam[1], cam[2], 0, 0, 0, 0, 1, 0);
     
 
     //make projection matrix
-    const proj = matrix.createFrustum(-1, 1, -1, 1, 3, 7)
+    const proj = matrix.createFrustum(-1, 1, -1, 1, 3, 300);  
+
     
     //Create the PVM transformation
     matrix.multiplySeries()
@@ -438,19 +569,17 @@ function drawScene(gl, programInfo, gears, angle_x, angle_y, la, amb) {
     gl.uniformMatrix4fv(programInfo.locations.u_VM_transform,
       false, vm_transform);
 
+    enableAttributes(gl, buffers, programInfo)
+    
     // now tell the shader (GPU program) to draw some triangles
     const offset = 0;
     gl.drawArrays(gl.TRIANGLES, offset, buffers.num_vertices);
     
   }
-  gl.uniform3f(programInfo.locations.u_Light_position, 2, 3, 4);
+  gl.uniform3f(programInfo.locations.u_Light_position, 4, 8, 3);
   gl.uniform1f(programInfo.locations.u_Shininess, 18);
-
-  // gl.uniform3f(programInfo.locations.u_Light_color,  amb[0], amb[1], amb[2]);
-  // gl.uniform3f(programInfo.locations.u_Ambient_color, 1, 1, 1);
-
+  gl.uniform1f(programInfo.locations.u_Diffuse_Factor, diffuse)
   gl.uniform3f(programInfo.locations.u_Light_color,  1, 1, 1);
-  gl.uniform3f(programInfo.locations.u_Ambient_color,amb[0], amb[1], amb[2]);
 
 }
 
