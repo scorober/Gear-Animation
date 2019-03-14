@@ -17,6 +17,7 @@ function main() {
 
   var angle_x = 0;
   var angle_y = 0;
+  var step_factor = 1;
 
   // Vertex shader program, runs on GPU, once per vertex
 
@@ -183,6 +184,11 @@ function main() {
         angle_y += 3;
       } else if (event.keyCode == 40) { //bottom
         angle_x += 3;
+      } else if (event.keyCode === 46) { //F
+        step_factor += 0.1
+      } else if (event.keyCode === 53) { //S
+        step_factor -= 0.1
+        if (step_factor < 0) step_factor = 0
       }
 
       drawScene(gl, programInfo, gears, angle_x, angle_y);
@@ -328,33 +334,46 @@ function main() {
   var lStep = 0.00165
   const ambient = [1, 1, 1]
   var t = 0
+  const tStep = 1 * step_factor
   const STEPS = 800
   const dStep = 1/ (STEPS / 2)
   var diffuse = 0
+
+  const points0 =  [
+    [-7, -7,  1],
+    [-7, 3,   1],
+    [3, 4.5, 5],
+    [8, 3,  10],                                                                           
+  ];
+
+  const points1 = [
+    [8, 3,  10], 
+    [3, 4.5, 5],
+    [-7, 3,  1],
+    [-7, -7, 1],
+  ];
+  var points = 0
+  var control_points = points0
   self.animate = function () {
-    t++
+    t += tStep
     if (t > STEPS) {
+      if (points === 0) {
+        points = 1
+        control_points = points0
+      } else {
+        points = 0
+        console.log(control_points)
+        control_points = points1
+        console.log(control_points)
+      }
       t = 0
     }
     if (diffuse < 1) {
       diffuse += dStep
     }
     
-    console.log(diffuse)
-    var camera_location = [0,0,0];
+    var camera_location = [0,0,0];  
 
-    var control_points = [
-                           [-7, -7,  1],
-                           [-7, 3,   1],
-                           [3, 4.5, 5],
-                           [8, 3,  10],                                                                           
-                         ];
-  
-
-    
-     // t/100.0
-     var cp;
-  
     //y = (1 − t)3, green: y= 3(1 − t)2 t, red: y= 3(1 − t) t2, and cyan: y = t3
   
      function weight(t) {
@@ -362,13 +381,10 @@ function main() {
      }
   
      weights = weight(t/1000);
-     
-     for (cp = 0; cp < 4; cp++ ) {
-           
+     for (let cp = 0; cp < 4; cp++ ) {
            camera_location[0] += weights[cp] * control_points[cp][0];
            camera_location[1] += weights[cp] * control_points[cp][1];
            camera_location[2] += weights[cp] * control_points[cp][2];
-  
     }    
     for (const key in gears) {
       const gear = gears[key]
