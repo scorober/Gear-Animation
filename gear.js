@@ -344,10 +344,10 @@ function main() {
     var camera_location = [0,0,0];
 
     var control_points = [
-                           [-7, -7,  -1],
-                           [3, 6,   -1],
-                           [0, 4.5, -20],
-                           [-3,3,  -60],                                                                           
+                           [-7, -7,  1],
+                           [-7, 3,   1],
+                           [3, 4.5, 5],
+                           [8,3,  10],                                                                           
                          ];
   
      // t/100.0
@@ -377,7 +377,7 @@ function main() {
       cStep = -cStep
     }
 
-    camera_location = [0, 3, 5]
+    // camera_location = [0, 3, 5]
     ambient[0] += cStep
     ambient[2] += cStep / 2
     // lookat += lStep;
