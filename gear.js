@@ -1,6 +1,7 @@
 main();
 
 
+
 function main() {
 
   const canvas = document.querySelector('#glcanvas');
@@ -184,10 +185,10 @@ function main() {
         angle_y += 3;
       } else if (event.keyCode == 40) { //bottom
         angle_x += 3;
-      } else if (event.keyCode === 46) { //F
-        step_factor += 0.1
-      } else if (event.keyCode === 53) { //S
-        step_factor -= 0.1
+      } else if (event.keyCode == 70) { //F
+        step_factor += 0.3
+      } else if (event.keyCode == 83) { //S
+        step_factor -= 0.3
         if (step_factor < 0) step_factor = 0
       }
 
@@ -244,6 +245,8 @@ function main() {
   const buff8 = initBuffers(gl, programInfo, scottGear(METAL_SKINNY))
   const buff9 = initBuffers(gl, programInfo, scottGear(base))
 
+
+  const ZINC = .85
   //TODO use an array instead
   const gears = {
     gear0: {
@@ -251,56 +254,56 @@ function main() {
       scale: [.25, .25, .25],
       translate: [.3766, .375, -.1],
       z_rot: 0,
-      z_inc: 0.15,
+      z_inc: ZINC,
     },
     gear1: {
       buffers:  buff1,
       scale: [.25, .25, .25],
       translate: [0, 0, 0],
       z_rot: 0,
-      z_inc: -0.15
+      z_inc: -ZINC
     },
     gear2: {
       buffers: buff2,
       scale: [.45, .45, .45],
       translate: [-.525, 0.525, 0],
       z_rot: 0,
-      z_inc: 0.101
+      z_inc: .673 * ZINC
     },
     gear3: {
       buffers: buff3, //oxford
       scale: [.25, .25, .25],
       translate: [-.2, .375, .75],
       z_rot: 0,
-      z_inc: -0.15
+      z_inc: -ZINC
     },
     gear4: {
       buffers: buff4, //osborne
       scale: [.1, .1, .1],
       translate: [-.19050, -.03, .75],
       z_rot: 0,
-      z_inc: 0.465
+      z_inc: 3.1 * ZINC
     },
     gear5: {
       buffers: buff5,
       scale: [.25, .25, .25],
       translate: [.3766, .375, .75],
       z_rot: 0,
-      z_inc: .15
+      z_inc: ZINC
     },
     gear6: {
       buffers: buff6,
       scale: [.06, .06, .06],
       translate: [.3766, .375, .35],
       z_rot: 0,
-      z_inc: 0.15,
+      z_inc: ZINC,
     },
     gear7: {
       buffers: buff7,
       scale: [.06, .06, .06],
       translate: [-.19050, -.03, .75 + .4],
       z_rot: 0,
-      z_inc: 0.465,
+      z_inc: 3.1 * ZINC,
     },
     gear8: {
       buffers: buff9,
@@ -326,17 +329,10 @@ function main() {
     sawZ += 0.03
   }
 
-
-  var lookat = 0
-
-  const C_STEPS = 500
-  var cStep = 1 / C_STEPS
-  var lStep = 0.00165
-  const ambient = [1, 1, 1]
   var t = 0
-  const tStep = 1 * step_factor
+  var tStep = 1 * step_factor
   const STEPS = 800
-  const dStep = 1/ (STEPS / 2)
+  const dStep = 1/ (STEPS / 3)
   var diffuse = 0
 
   const points0 =  [
@@ -344,17 +340,19 @@ function main() {
     [-7, 3,   1],
     [3, 4.5, 5],
     [8, 3,  10],                                                                           
-  ];
+  ]
 
   const points1 = [
     [8, 3,  10], 
     [3, 4.5, 5],
     [-7, 3,  1],
     [-7, -7, 1],
-  ];
+  ]
+
   var points = 0
   var control_points = points0
   self.animate = function () {
+    tStep = 1 * step_factor
     t += tStep
     if (t > STEPS) {
       if (points === 0) {
@@ -362,9 +360,7 @@ function main() {
         control_points = points0
       } else {
         points = 0
-        console.log(control_points)
         control_points = points1
-        console.log(control_points)
       }
       t = 0
     }
@@ -374,13 +370,11 @@ function main() {
     
     var camera_location = [0,0,0];  
 
-    //y = (1 − t)3, green: y= 3(1 − t)2 t, red: y= 3(1 − t) t2, and cyan: y = t3
-  
      function weight(t) {
          return [  Math.pow(1-t,3), 3*Math.pow(1-t,2)*t, 3*(1-t)*Math.pow(t,2), Math.pow(t,3) ];
      }
   
-     weights = weight(t/1000);
+     weights = weight(t / STEPS);
      for (let cp = 0; cp < 4; cp++ ) {
            camera_location[0] += weights[cp] * control_points[cp][0];
            camera_location[1] += weights[cp] * control_points[cp][1];
@@ -390,20 +384,7 @@ function main() {
       const gear = gears[key]
       gear.z_rot += gear.z_inc
     }
-    var col = ambient[0]
-    if (col <= 0 || col >= 1) {
-      cStep = -cStep
-    }
 
-    // camera_location = [0, 3, 5]
-    ambient[0] += cStep
-    ambient[2] += cStep / 2
-    // lookat += lStep;
-    // if (lookat > 2.25 || lookat <= -2.25) {
-    //   lStep = -lStep
-    // }
-    // Draw the scene
-    //Angle_x/y reserved for user rotation
     drawScene(gl, programInfo, gears, angle_x, angle_y, camera_location, diffuse);
     requestAnimationFrame(self.animate)
   }
